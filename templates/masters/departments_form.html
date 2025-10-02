@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Add Department{% endblock %}
+{% block content %}
+<div class="container">
+  <h2>Add Department</h2>
+  <form method="post">
+    {% csrf_token %}
+
+    <label for="name">Department Name:</label>
+    {{ form.name }} <br><br>
+
+    <label for="division">Division:</label>
+    {{ form.division }} <br><br>
+
+    
+      <select id="country" name="country" required>
+        <option value="">Select Country</option>
+      </select>
+
+  <select id="state" name="state" required>
+    <option value="">Select State</option>
+  </select>
+
+  <select id="city" name="city" required>
+    <option value="">Select City</option>
+  </select>
+
+    <button type="submit" class="btn">Save</button>
+  </form>
+</div>
+
+<script>
+  // Predefined country-state-city mapping
+  const data = {
+    "Australia": {
+      "New South Wales": ["Sydney", "Newcastle", "Wollongong"],
+      "Victoria": ["Melbourne", "Geelong", "Ballarat", "Bendigo"],
+      "Western Australia": ["Perth"]
+    }
+  };
+
+  const countrySelect = document.getElementById("country");
+  const stateSelect = document.getElementById("state");
+  const citySelect = document.getElementById("city");
+
+  // Populate country dropdown
+  for (const country in data) {
+    const option = document.createElement("option");
+    option.value = country;
+    option.textContent = country;
+    countrySelect.appendChild(option);
+  }
+
+  // When country changes → populate states
+  countrySelect.addEventListener("change", function () {
+    stateSelect.innerHTML = '<option value="">Select State</option>';
+    citySelect.innerHTML = '<option value="">Select City</option>';
+
+    if (this.value && data[this.value]) {
+      for (const state in data[this.value]) {
+        const option = document.createElement("option");
+        option.value = state;
+        option.textContent = state;
+        stateSelect.appendChild(option);
+      }
+    }
+  });
+
+  // When state changes → populate cities
+  stateSelect.addEventListener("change", function () {
+    citySelect.innerHTML = '<option value="">Select City</option>';
+
+    const country = countrySelect.value;
+    if (country && this.value && data[country][this.value]) {
+      data[country][this.value].forEach(city => {
+        const option = document.createElement("option");
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+      });
+    }
+  });
+</script>
+{% endblock %}

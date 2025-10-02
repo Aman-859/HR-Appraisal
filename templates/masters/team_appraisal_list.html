@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Team Appraisal Forms Review</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <table class="table table-hover table-bordered align-middle">
+        <thead class="table-dark text-center">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Employee</th>
+            <th scope="col">Appraisal Year</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for form in team_appraisal_forms %}
+          <tr>
+            <td class="text-center">{{ forloop.counter }}</td>
+            <td>{{ form.employee.first_name }} {{ form.employee.last_name }}</td>
+            <td class="text-center">{{ form.appraisal_cycle.year }}</td>
+            <td class="text-center">
+              <a href="{% url 'masters:appraisal_form' form.id %}" 
+                 class="btn btn-sm btn-primary">
+                Review Appraisal
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-3">
+              No appraisal forms found for your team
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

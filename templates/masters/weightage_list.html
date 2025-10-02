@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Weightage Master{% endblock %}
+{% block content %}
+<div class="container">
+  <h2>Weightage Master</h2>
+  <a href="{% url 'masters:weightage_create' %}" class="btn btn-primary mb-2">Add Weightage</a>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Cycle</th><th>Year</th><th>Emp</th><th>Supervisor</th><th>Mgr1</th><th>Mgr2</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for w in weightages %}
+      <tr>
+        <td>{{ w.appraisal_cycle }}</td>
+        <td>{{ w.current_year }}</td>
+        <td>{{ w.weightage_employee }}%</td>
+        <td>{{ w.weightage_supervisor }}%</td>
+        <td>{{ w.weightage_manager1 }}%</td>
+        <td>{{ w.weightage_manager2 }}%</td>
+        <td>
+          <a href="{% url 'masters:weightage_update' w.pk %}" class="btn btn-sm btn-warning">Edit</a>
+          <a href="{% url 'masters:weightage_delete' w.pk %}" class="btn btn-sm btn-danger">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7">No weightages found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

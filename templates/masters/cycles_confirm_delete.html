@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete Cycle{% endblock %}
+{% block content %}
+<div class="container" style="max-width:500px;">
+  <h2>Delete Appraisal Cycle</h2>
+  <p>Are you sure you want to delete <strong>{{ object.name }} ({{ object.year }})</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn" style="background:red;">Yes, Delete</button>
+    <a href="{% url 'masters:cycles_list' %}" class="btn">Cancel</a>
+  </form>
+</div>
+{% endblock %}

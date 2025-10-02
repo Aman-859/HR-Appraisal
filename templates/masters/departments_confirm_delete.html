@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Delete Department{% endblock %}
+{% block content %}
+{% load static %}
+<div class="container" style="max-width:500px;">
+  <h2>Delete Department</h2>
+  <p>Are you sure you want to delete <strong>{{ department.name }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn" style="background-color:red;">Yes, Delete</button>
+    <a href="{% url 'masters:list_departments' %}" class="btn">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Appraisal Form</h2>
+  <form method ="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Appraisal Type</strong></label>
+        <input type="text" class="form-control" value="{{ appraisal.appraisal_cycle.name }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Appraisal Year</strong></label>
+        <input type="text" class="form-control" value="{{ appraisal.appraisal_cycle.year }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Appraisal Status</strong></label>
+        <input type="text" class="form-control" value="{{ appraisal.status }}" readonly>
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Employee ID</strong></label>
+        <input type="text" class="form-control" value="{{ employee.employee_id }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Employee Name:</strong></label>
+        <input type="text" class="form-control" value="{{ employee.first_name }} {{ employee.last_name }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Employee Designation</strong></label>
+        <input type="text" class="form-control" value="{{ employee.role }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Employee Status</strong></label>
+        <input type="text" class="form-control" value="{{ employee.status }}" readonly>
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Department:</strong></label>
+        <input type="text" class="form-control" value="{{ employee.department.name }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Division</strong></label>
+        <input type="text" class="form-control" value="{{ employee.department.division }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Supervisor</strong></label>
+        <input type="text" class="form-control" value="{{ employee.supervisor }}" readonly>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label"><strong>Manager</strong></label>
+        <input type="text" class="form-control" value="{{ employee.manager }}" readonly>
+      </div>
+    </div>
+
+
+    {% for kra in kras %}
+  <div class="card mb-4 p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5>KRA {{ forloop.counter }}: {{ kra.kra_name }}</h5>
+      <div class="ms-3">
+
+
+        {# ✅ Checkbox only visible to manager #}
+        {% if is_manager %}
+  <div class="form-check mb-2">
+    <input type="checkbox" 
+           class="form-check-input"
+           name="kra_visible_{{ kra.id }}" 
+           id="kra_visible_{{ kra.id }}"
+           {% if kra.is_visible %}checked{% endif %}>
+    <label for="kra_visible_{{ kra.id }}" class="form-check-label">
+      Visible to Employee
+    </label>
+  </div>
+{% endif %}
+
+
+        <label class="form-label me-2"><strong>Weightage:</strong></label>
+        <input type="number" 
+              name="kra_weightage_{{ kra.id }}" 
+              value="{{ kra.weightage }}" 
+              class="form-control d-inline-block" 
+              style="width: 100px;" 
+              min="0" max="100"> %
+      </div>
+    </div>
+    
+    <table class="table table-bordered mt-2">
+      <thead>
+        <tr>
+          <th>KPI</th>
+          <th>Target</th>
+          <th>Achieved</th>
+          <th>Remarks</th>
+          <th>Weightage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for kpi in kra.kpis.all %}
+          <tr>
+            <td>{{ kpi.name }}</td>
+            <td><input type="text" name="target_{{ kpi.id }}" class="form-control"></td>
+            <td><input type="text" name="achieved_{{ kpi.id }}" class="form-control"></td>
+            <td><input type="text" name="remarks_{{ kpi.id }}" class="form-control"></td>
+            <td>
+              <input type="number"
+                     name="kpi_weightage_{{ kpi.id }}"
+                     value="{{ kpi.weightage|default:0 }}"
+                     class="form-control"
+                     min="0" max="100">
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endfor %}
+
+
+    <h6 class="mt-3">Added Objectives By Employee</h6>
+    {% for obj in objectives %}
+      <div class="card mb-4 p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5>{{ obj.objective }}</h5>
+          <div class="ms-3">
+            <label class="form-label me-2"><strong>Weightage:</strong></label>
+            <input type="number" name="objective_weightage_{{ obj.id }}" value="{{ obj.weightage }}" class="form-control d-inline-block" style="width: 100px;" min="0" max="100"> %
+          </div>
+        </div>
+        <table class="table table-bordered mt-2">
+          <thead>
+            <tr>
+              <th>KPI</th>
+              <th>Target</th>
+              <th>Achieved</th>
+              <th>Remarks</th>
+              <th>Weightage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for kpi in obj.kpis.all %}
+              <tr>
+                <td>{{ kpi.name }}</td>
+                <td>{{ kpi.target|default:"-" }}</td>
+                <td>{{ kpi.achieved|default:"-" }}</td>
+                <td>{{ kpi.remarks|default:"-" }}</td>
+                <td>
+                  <input type="number" name="kpi_weightage_{{ kpi.id }}" value="{{ kpi.weightage|default:0 }}" class="form-control" min="0" max="100">
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-muted text-center">No KPIs added yet</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% empty %}
+      <p class="text-muted">No objectives yet</p>
+    {% endfor %}
+
+
+    <div class="container mt-4">
+      
+      {% if appraisal.pk %}
+        <a href="{% url 'masters:add_objective' appraisal.pk %}" class="btn btn-warning mb-4">Add Objective</a>
+      {% else %}
+        <p class="text-muted">No appraisal found.</p>
+      {% endif %}
+
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label class="form-label"><strong>Employee Rating</strong></label>
+          <input type="number" name="employee_rating" class="form-control" min="0" max="10">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label"><strong>Employee Remarks</strong></label>
+          <input type="text" name="employee_remarks" class="form-control">
+        </div>
+      </div>
+
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label class="form-label"><strong>Supervisor Rating</strong></label>
+          <input type="number" name="supervisor_rating" class="form-control" min="0" max="10">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label"><strong>Supervisor Remarks</strong></label>
+          <input type="text" name="supervisor_remarks" class="form-control">
+        </div>
+      </div>
+
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label class="form-label"><strong>Manager Rating</strong></label>
+          <input type="number" name="manager_rating" class="form-control" min="0" max="10">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label"><strong>Manager Remarks</strong></label>
+          <input type="text" name="manager_remarks" class="form-control">
+        </div>
+      </div>
+
+
+      <button type="submit" name="action" value="draft" class="btn btn-warning">Save as Draft</button>
+      <button type="submit" name="action" value="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}KPIs{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2>Key Performance Indicators (KPIs)</h2>
+    <a class="btn" href="{% url 'masters:kpis_add' %}">Add KPI</a>
+  </div>
+
+  {% regroup kpis by kra as kra_list %}
+
+  {% if kra_list %}
+    {% for kra in kra_list %}
+      <div style="margin-top:18px; border:1px solid #e3e8ef; border-radius:10px; overflow:hidden;">
+        <div style="background:#1565c0; color:#fff; padding:10px 14px; font-weight:600;">
+          {{ kra.grouper.kra_name }} ({{ kra.grouper.department.name }})
+        </div>
+
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="background:#1976d2; color:#fff;">
+              <th style="text-align:left; padding:10px;">KPI Name</th>
+              <th style="text-align:left; padding:10px;">Description</th>
+              <th style="text-align:left; padding:10px; width:120px;">Weightage</th>
+              <th style="text-align:left; padding:10px; width:160px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for kpi in kra.list %}
+            <tr style="border-top:1px solid #e6eef7;">
+              <td style="padding:10px;">{{ kpi.name }}</td>
+              <td style="padding:10px;">{{ kpi.description|default:"—" }}</td>
+              <td style="padding:10px;">{{ kpi.weightage }}</td>
+              <td style="padding:10px;">
+                <a href="{% url 'masters:kpis_edit' kpi.id %}" class="btn">Edit</a>
+                <a href="{% url 'masters:kpis_delete' kpi.id %}" class="btn" style="background:red;">Delete</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No KPIs found.</p>
+  {% endif %}
+</div>
+{% endblock %}

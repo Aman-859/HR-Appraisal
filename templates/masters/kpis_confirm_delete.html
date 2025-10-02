@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Delete KPI{% endblock %}
+{% block content %}
+<div class="container" style="max-width:500px;">
+  <h2>Delete KPI</h2>
+  <p>Are you sure you want to delete <strong>{{ object.name }}</strong> under
+     KRA <strong>{{ object.kra.kra_name }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn" style="background:red;">Yes, Delete</button>
+    <a href="{% url 'masters:kpis_list' %}" class="btn">Cancel</a>
+  </form>
+</div>
+{% endblock %}

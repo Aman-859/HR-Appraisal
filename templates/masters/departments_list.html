@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Departments{% endblock %}
+{% block content %}
+{% load static %}
+<div class="container">
+  <h2>Departments</h2>
+  <a class="btn" href="{% url 'masters:add_department' %}">Add Department </a>
+  <table>
+    <tr>
+      <th>Department Name </th><th>Division</th><th>City</th><th>State</th><th>Country</th><th>Actions</th>
+    </tr>
+    {% for dept in departments %}
+    <tr>
+      
+      <td>{{ dept.name }}</td>
+      <td>{{ dept.division }}</td>
+      <td>{{ dept.city }}</td>
+      <td>{{ dept.state }}</td>
+      <td>{{ dept.country }}</td>
+      <td>
+        <a href="{% url 'masters:edit_department' dept.id %}" class="btn">Edit</a>
+        <a href="{% url 'masters:delete_department' dept.id %}" class="btn" style="background-color:red;">Delete</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">No departments yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

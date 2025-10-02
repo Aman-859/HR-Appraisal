@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete Role{% endblock %}
+{% block content %}
+<div class="container" style="max-width:500px;">
+  <h2>Delete Role</h2>
+  <p>Are you sure you want to delete <strong>{{ object.role_name }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn" style="background-color:red;">Yes, Delete</button>
+    <a href="{% url 'masters:roles_list' %}" class="btn">Cancel</a>
+  </form>
+</div>
+{% endblock %}

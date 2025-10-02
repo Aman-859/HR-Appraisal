@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}KRAs{% endblock %}
+{% block content %}
+<div class="container">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2>Key Result Areas (KRAs)</h2>
+    <a class="btn" href="{% url 'masters:kras_add' %}">Add KRA</a>
+  </div>
+
+  {# Group KRAs by department #}
+  {% regroup kras by department as department_list %}
+
+  {% if department_list %}
+    {% for dept in department_list %}
+      <div style="margin-top:18px; border:1px solid #e3e8ef; border-radius:10px; overflow:hidden;">
+        <div style="background:#0d47a1; color:#fff; padding:10px 14px; font-weight:600;">
+          {{ dept.grouper.name|default:dept.grouper }}
+        </div>
+
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="background:#1976d2; color:#fff;">
+              <th style="text-align:left; padding:10px;">KRA Name</th>
+              <th style="text-align:left; padding:10px; width:120px;">Weightage</th>
+              <th style="text-align:left; padding:10px; width:160px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for kra in dept.list %}
+            <tr style="border-top:1px solid #e6eef7;">
+              <td style="padding:10px;">{{ kra.kra_name }}</td>
+              <td style="padding:10px;">{{ kra.weightage }}</td>
+              <td style="padding:10px;">
+                <a href="{% url 'masters:kras_edit' kra.id %}" class="btn">Edit</a>
+                <a href="{% url 'masters:kras_delete' kra.id %}" class="btn" style="background:red;">Delete</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No KRAs found.</p>
+  {% endif %}
+</div>
+{% endblock %}

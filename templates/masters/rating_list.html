@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Rating Master List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Rating Master List</h2>
+  <a href="{% url 'masters:rating_create' %}" class="btn btn-success mb-3">Add Rating</a>
+  
+  <table class="table table-bordered table-striped">
+    <thead class="table-primary">
+      <tr>
+        <th>ID</th>
+        <th>Appraisal Cycle</th>
+        <th>Year</th>
+        <th>Appraisal ID</th>
+        <th>Score</th>
+        <th>Rating</th>
+        <th>Created</th>
+        <th>Updated</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rating in ratings %}
+      <tr>
+        <td>{{ rating.id }}</td>
+        <td>{{ rating.appraisal_cycle }}</td>
+        <td>{{ rating.current_year }}</td>
+        <td>{{ rating.appraisal_id }}</td>
+        <td>{{ rating.rating_score }}</td>
+        <td><strong>{{ rating.rating }}</strong></td>
+        <td>{{ rating.create_date_time|date:"Y-m-d H:i" }}</td>
+        <td>{{ rating.update_date_time|date:"Y-m-d H:i" }}</td>
+        <td>
+          <a href="{% url 'masters:rating_update' rating.id %}" class="btn btn-warning btn-sm">Edit</a>
+          <a href="{% url 'masters:rating_delete' rating.id %}" class="btn btn-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="9" class="text-center">No ratings found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Appraisal Cycles{% endblock %}
+{% block content %}
+<div class="container">
+  <h2>Appraisal Cycles</h2>
+  <a class="btn" href="{% url 'masters:cycles_add' %}">Add Cycle</a>
+  <table>
+    <tr>
+      <th>Name</th><th>Year</th><th>Start Date</th><th>End Date</th><th>Status</th><th>Actions</th>
+    </tr>
+    {% for cycle in cycles %}
+    <tr>
+      <td>{{ cycle.name }}</td>
+      <td>{{ cycle.year }}</td>
+      <td>{{ cycle.start_date }}</td>
+      <td>{{ cycle.end_date }}</td>
+      <td>{{ cycle.status }}</td>
+      <td>
+        <a href="{% url 'masters:cycles_edit' cycle.id %}" class="btn">Edit</a>
+        <a href="{% url 'masters:cycles_delete' cycle.id %}" class="btn" style="background:red;">Delete</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">No cycles available</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
