@@ -83,10 +83,10 @@
                 {% endif %}
               </ul>
             </li>
-            {% if request.user.employee.role.role_name|lower == "manager" %}
+            
             <li><a href="{% url 'masters:my_appraisal' %}">My Appraisals</a></li>
             <li><a href="{% url 'masters:team_appraisal' %}">Team Appraisals </a></li>
-            {% endif %}
+            
             <li><a href="{% url 'masters:reviews_list' %}">Reviews</a></li>
             <li><a href="">Reports</a></li>
             <li><a href="">Notifications</a></li>
