@@ -102,10 +102,11 @@
     <a href="{% url 'masters:my_appraisal' %}">My Appraisal</a>
   </li>
 {% endif %}
-
+             {% if role_name == 'manager' or role_name == 'hr admin' %}
             <li><a href="{% url 'masters:team_appraisal' %}">Team Appraisals </a></li>
             
             <li><a href="{% url 'masters:reviews_list' %}">Reviews</a></li>
+            {% endif %}
             <li><a href="">Reports</a></li>
             <li><a href="">Notifications</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
