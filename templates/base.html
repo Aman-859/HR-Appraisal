@@ -69,19 +69,19 @@
 
             <!-- Masters dropdown -->
             <li class="dropdown">
+                {% if role_name == 'manager' or role_name == 'hr admin' %}
               <a href="#">Masters ▾</a>
               <ul class="dropdown-content">
                 <li><a href="{% url 'masters:list_departments' %}">Departments</a></li>
                 <li><a href="{% url 'masters:roles_list' %}">Roles</a></li>
                 <li><a href="{% url 'masters:cycles_list' %}">Appraisal Cycles</a></li>
                 <li><a href="{% url 'masters:employees_list' %}">Employees</a></li>
-                {% if role_name == 'manager'%}
                 <li><a href="{% url 'masters:kras_list' %}">KRA Master</a></li>
                 <li><a href="{% url 'masters:kpis_list' %}">KPI Master</a></li>
                 <li><a href="{% url 'masters:rating_list' %}">Rating Master</a></li>
                 <li><a href="{% url 'masters:weightage_list' %}">Weightage Master</a></li>
-                {% endif %}
               </ul>
+                {% endif %}
             </li>
             
             <!-- <li><a href="{% url 'masters:my_appraisal' %}">My Appraisals</a></li> -->
