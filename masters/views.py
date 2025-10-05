@@ -485,18 +485,31 @@ def add_objective(request, appraisal_id):
         if form.is_valid():
             objective = form.save(commit=False)
             objective.appraisal_form = appraisal_form
-            objective.employee = request.user.employee  
+
+            # ✅ fetch Employee linked to logged-in user
+            employee = get_object_or_404(Employee, user=request.user)
+            objective.employee = employee
             objective.save()
 
             kpi_formset = EmployeeKPIFormSet(request.POST, instance=objective)
             if kpi_formset.is_valid():
                 kpi_formset.save()
+
             return redirect("masters:appraisal_form", appraisal_id=appraisal_id)
     else:
         form = EmployeeObjectiveForm()
         kpi_formset = EmployeeKPIFormSet()
 
-    return render(request, "appraisal/add_objective.html", {"form": form, "appraisal": appraisal_form,"kpi_formset": kpi_formset,})
+    return render(
+        request,
+        "appraisal/add_objective.html",
+        {
+            "form": form,
+            "appraisal": appraisal_form,
+            "kpi_formset": kpi_formset,
+        },
+    )
+
 
 
 

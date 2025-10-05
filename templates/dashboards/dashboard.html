@@ -10,26 +10,40 @@
 
 
 
-        <img src="{% static 'images/employee_dashboard.png'%}" class="fullscreen-bg" style = "object-fit:cover;"alt="employee-dashboard">
+        <img src="{% static 'images/employee_dash_oliver.png'%}" class="fullscreen-bg" style = "object-fit:cover;"alt="employee-dashboard">
 
         
         
 
     {% elif role_name == "supervisor" %}
 
+    
 
 
-        <img src="{% static 'images/Manager_dashboard.png'%}" class="fullscreen-bg" style = "object-fit:cover;"alt="Manager-dashboard">
+
+
+
+        <img src="{% static 'images/manager_supervisior_dash.jpg'%}" class="fullscreen-bg" style = "object-fit:cover;"alt="Manager-dashboard">
+     
         
-             
+
+
+
+    {% elif role_name|lower == "hr admin" %}
+        <img src="{% static 'images/hr_admin_dash.jpg' %}" class="fullscreen-bg" style = "object-fit:cover;"alt="Manager-dashboard" >
         
+
+
+
+
+
 
     {% elif role_name == "manager" %} 
     
     
                 
     
-        <img src="{% static 'images/Manager_dashboard.png'%}" class="fullscreen-bg" style = "object-fit:cover;"alt="Manager-dashboard">
+        <img src="{% static 'images/manager_supervisior_dash.jpg'%}" class="fullscreen-bg" style = "object-fit:cover;"alt="Manager-dashboard">
 
     {% else %}
         
