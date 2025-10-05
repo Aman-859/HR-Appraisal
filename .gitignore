@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.virtualenv/
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+*.py~
+*.sqlite3-journal
+db.sqlite3-journal
+local_settings.py
+media/
+staticfiles/
+static_root/
+static_cdn/
+media_cdn/
+
+# If you want to keep your database file (db.sqlite3), DO NOT ignore it.
+# So, don't add "db.sqlite3" here.
+
+# VS Code / PyCharm / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+*.seed
+*.log
+docker-compose.override.yml
+
+# Environment variables
+.env
+.env.*
+
+# Backup or cache
+*.bak
+*.tmp
+*.cache

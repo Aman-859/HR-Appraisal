@@ -84,19 +84,25 @@
                 {% endif %}
             </li>
             
-            <!-- <li><a href="{% url 'masters:my_appraisal' %}">My Appraisals</a></li> -->
-             <li class="dropdown">
-          <a href="{% url 'masters:my_appraisal' %}">My Appraisals ▾</a>
-          <ul class="dropdown-content" aria-labelledby="appraisalDropdown">
-          <li>
-            <a href="{% url 'masters:employees_list' %}">Assign Employees</a>
-          </li>
-          <!-- 🔮 Future items -->
-          <li><a class="dropdown-item" href="#">Adjust KRAs</a></li>
-          <li><a class="dropdown-item" href="#">Set Objectives</a></li>
-          <li><a class="dropdown-item" href="#">Review Progress</a></li>
-        </ul>
-        </li>
+            
+    {% if role_name == 'manager' or role_name == 'hr admin' %}
+  <li class="dropdown">
+    <a href="#" class="dropbtn">My Appraisals ▾</a>
+    <ul class="dropdown-content" aria-labelledby="appraisalDropdown">
+      <li><a href="{% url 'masters:my_appraisal' %}">View My Appraisal</a></li>
+      <li><a href="{% url 'masters:employees_list' %}">Assign Employees</a></li>
+      <li><a href="#">Adjust KRAs</a></li>
+      <li><a href="#">Set Objectives</a></li>
+      <li><a href="#">Review Progress</a></li>
+    </ul>
+  </li>
+
+{% else %}
+  <li>
+    <a href="{% url 'masters:my_appraisal' %}">My Appraisal</a>
+  </li>
+{% endif %}
+
             <li><a href="{% url 'masters:team_appraisal' %}">Team Appraisals </a></li>
             
             <li><a href="{% url 'masters:reviews_list' %}">Reviews</a></li>
