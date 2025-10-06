@@ -69,7 +69,7 @@
 
             <!-- Masters dropdown -->
             <li class="dropdown">
-                {% if role_name == 'manager' or role_name == 'hr admin' %}
+                {% if role_name == 'hr admin' %}
               <a href="#">Masters ▾</a>
               <ul class="dropdown-content">
                 <li><a href="{% url 'masters:list_departments' %}">Departments</a></li>
@@ -102,7 +102,7 @@
     <a href="{% url 'masters:my_appraisal' %}">My Appraisal</a>
   </li>
 {% endif %}
-             {% if role_name == 'manager' or role_name == 'hr admin' %}
+             {% if role_name == 'manager' or role_name == 'hr admin' or role_name == 'supervisor' %}
             <li><a href="{% url 'masters:team_appraisal' %}">Team Appraisals </a></li>
             
             <li><a href="{% url 'masters:reviews_list' %}">Reviews</a></li>
