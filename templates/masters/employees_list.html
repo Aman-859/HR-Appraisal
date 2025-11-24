@@ -1,33 +1,235 @@
 {% extends "base.html" %}
 {% block title %}Employees{% endblock %}
 {% block content %}
+
+<style>
+    .container {
+        max-width: 1600px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .btn-add {
+        background: #3498db;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+    
+    .btn-add:hover {
+        background: #2980b9;
+    }
+    
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    thead {
+        background: #3498db;
+    }
+    
+    th {
+        padding: 16px 12px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 13px;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    tbody tr {
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    tbody tr:last-child {
+        border-bottom: none;
+    }
+    
+    td {
+        padding: 14px 12px;
+        color: #2c3e50;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+    
+    .employee-id-link {
+        color: #2c3e50;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 15px;
+    }
+    
+    .employee-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+    
+    .btn-icon {
+        color: #6c757d;
+        font-size: 18px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 4px;
+    }
+    
+    .btn-icon:hover {
+        transform: scale(1.2);
+    }
+    
+    .btn-view:hover {
+        color: #3498db;
+    }
+    
+    .btn-edit:hover {
+        color: #f39c12;
+    }
+    
+    .btn-delete:hover {
+        color: #e74c3c;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+        font-size: 16px;
+    }
+</style>
+
 <div class="container">
-  <h2>Employees</h2>
-  <a class="btn" href="{% url 'masters:employees_add' %}">Add Employee</a>
-  <table>
-    <tr>
-      <th>ID</th><th>Salutation</th><th>Name</th><th>Email</th><th>Gender</th><th>Contact Number</th><th>Department</th><th>Role</th><th>Supervisor</th><th>Status</th><th>Actions</th>
-    </tr>
-    {% for emp in employees %}
-    <tr>
-      <td>{{ emp.employee_id }}</td>
-      <td>{{ emp.employee_salution }}</td>
-      <td>{{ emp.first_name }} {{ emp.last_name }}</td>
-      <td>{{ emp.email }}</td>
-      <td>{{ emp.gender }}</td>
-      <td>{{ emp.contact_number }}</td>
-      <td>{{ emp.department }}</td>
-      <td>{{ emp.role }}</td>
-      <td>{{ emp.supervisor }}</td>
-      <td>{{ emp.status }}</td>
-      <td>
-        <a href="{% url 'masters:employees_edit' emp.id %}" class="btn">Edit</a>
-        <a href="{% url 'masters:employees_delete' emp.id %}" class="btn" style="background:red;">Delete</a>
-      </td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="8">No employees available</td></tr>
-    {% endfor %}
-  </table>
+    
+    <div class="page-header">
+        <h2>Employees</h2>
+        <a class="btn-add" href="{% url 'masters:employees_add' %}">Add Employee</a>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Salutation</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                    <th>Contact</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Supervisor</th>
+                    <th>Status</th>
+                    <th style="text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                <tr>
+                    <td>
+                        <a href="{% url 'masters:emp_profile_view' emp.employee_id %}" class="employee-id-link">
+                            {{ emp.employee_id }}
+                        </a>
+                    </td>
+                    <td>{{ emp.employee_salution|default:"-" }}</td>
+                    <td class="employee-name">{{ emp.first_name }} {{ emp.last_name }}</td>
+                    <td>{{ emp.email }}</td>
+                    <td>{{ emp.gender|default:"-" }}</td>
+                    <td>{{ emp.contact_number }}</td>
+                    <td>{{ emp.department|default:"-" }}</td>
+                    <td>{{ emp.role|default:"-" }}</td>
+                    <td>{{ emp.supervisor|default:"-" }}</td>
+                    <td>
+                        <span class="status-badge {% if emp.status == 'Active' %}status-active{% else %}status-inactive{% endif %}">
+                            {{ emp.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'masters:emp_profile_view' emp.employee_id %}" class="btn-icon btn-view" title="View Profile">
+                               <i class="fa-solid fa-eye"></i>
+
+                            </a>
+                            <a href="{% url 'masters:employees_edit' emp.id %}" class="btn-icon btn-edit" title="Edit">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <a href="{% url 'masters:employees_delete' emp.id %}" class="btn-icon btn-delete" title="Delete"
+                               onclick="return confirm('Are you sure you want to delete {{ emp.first_name }} {{ emp.last_name }}?')">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11" class="no-data">
+                        No employees available
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
 </div>
+
 {% endblock %}

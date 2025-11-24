@@ -15,15 +15,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import RatingMaster, WeightageMaster
 from .forms import RatingMasterForm, WeightageMasterForm ,EmployeeKPIFormSet
-from .models import Department, Country, State, City
+from .models import Department, Country, State, City , PersonnelDocument ,EmergencyContact , EmployeePersonalDetails ,Education
 from .forms import DepartmentForm
-from .models import Employee, KRA, KPI
-from .models import AppraisalCycle, Employee
+from .models import Employee, KRA, KPI ,ExternalExperience ,Certification ,Training
+from .models import AppraisalCycle, Employee  , InternalExperience , Grading
 from .models import AppraisalCycle, AppraisalForm, Employee, KRA
 from .models import EmployeeObjective
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
+from dateutil.relativedelta import relativedelta
+from datetime import date
 # List view
 @login_required
 def list_departments(request):
@@ -541,5 +543,368 @@ def review_list_form(request):
         "draft_forms":draft_forms,
         "employee":employee
     }
-
     return render(request,"appraisal/review_list.html",context)
+
+
+def is_hr_admin(user):
+    """
+    Check if user is HR Admin
+    Based on Role model - assuming HR Admin role exists
+    """
+    try:
+        employee = Employee.objects.get(user=user)
+        # Check if employee's role is HR Admin
+        return employee.role and employee.role.role_name.lower() in ['hr admin', 'hr', 'admin']
+    except Employee.DoesNotExist:
+        return False
+    
+ 
+def calculate_months_from_experiences(experiences):
+    """
+    Helper function to calculate total months from any experience list
+    Returns: integer (total months)
+    """
+    total_months = 0
+    
+    for exp in experiences:
+        # Get end date (today if still working)
+        end_date = exp.to_date if exp.to_date else date.today()
+        
+        # Skip if dates are invalid (end before start)
+        if exp.to_date and exp.to_date < exp.from_date:
+            continue
+        
+        # Calculate months
+        delta = relativedelta(end_date, exp.from_date)
+        months = (delta.years * 12) + delta.months
+        
+        # Only add positive months
+        if months > 0:
+            total_months += months
+    
+    return total_months
+
+def format_experience(total_months):
+    """
+    Convert months to readable format
+    Returns: "5 years, 3 months" or "N/A"
+    """
+    if total_months == 0:
+        return "N/A"
+    
+    years = total_months // 12
+    months = total_months % 12
+    
+    if years > 0 and months > 0:
+        return f"{years} years, {months} months"
+    elif years > 0:
+        return f"{years} years"
+    else:
+        return f"{months} months"
+
+def calculate_internal_experience(employee):
+    """
+    Calculate Synnex experience (Internal only)
+    Returns: "5 years, 3 months" or "N/A"
+    """
+    internal_experiences = InternalExperience.objects.filter(employee=employee)
+    if not internal_experiences.exists():
+        return "N/A"
+    
+    total_months = calculate_months_from_experiences(internal_experiences)
+    return format_experience(total_months)
+
+def calculate_external_experience(employee):
+    """
+    Calculate External experience (Other companies)
+    Returns: "3 years, 6 months" or "N/A"
+    """
+    external_experiences = ExternalExperience.objects.filter(employee=employee) 
+    if not external_experiences.exists():
+        return "N/A"
+    
+    total_months = calculate_months_from_experiences(external_experiences)
+    return format_experience(total_months)
+
+def calculate_total_experience(employee):
+    """
+    Calculate Total experience (External + Internal)
+    REUSES the other functions!
+    Returns: "10 years, 6 months" or "N/A"
+    """
+    external_experiences = ExternalExperience.objects.filter(employee=employee)
+    internal_experiences = InternalExperience.objects.filter(employee=employee)
+    
+    if not external_experiences.exists() and not internal_experiences.exists():
+        return "N/A"
+    
+    external_months = calculate_months_from_experiences(external_experiences)
+    internal_months = calculate_months_from_experiences(internal_experiences)
+    total_months = external_months + internal_months
+    return format_experience(total_months)
+
+@login_required
+def emp_profile(request, employee_id=None):
+    current_is_hr = is_hr_admin(request.user)
+    if employee_id and current_is_hr:
+        employee = get_object_or_404(Employee, employee_id=employee_id)
+    else:
+        employee = get_object_or_404(Employee, user=request.user)
+    
+    personal, _ = EmployeePersonalDetails.objects.get_or_create(employee=employee)
+    emergency_contacts = EmergencyContact.objects.filter(employee=employee).first()
+    internal_experience = InternalExperience.objects.filter(employee=employee)
+    
+     
+    current_internal = internal_experience.filter(is_current=True).first()
+    current_grading = current_internal.grading if current_internal else None
+
+    synnex_experience = calculate_internal_experience(employee)
+    total_experience = calculate_total_experience(employee)
+
+    documents = employee.personnel_documents.all()
+    education = employee.education_records.all()
+    external_experience = employee.external_experiences.all()
+    certifications = employee.certifications.all()
+    trainings = employee.trainings.all()
+    
+    if request.method == "POST":
+        form_type = request.POST.get("form_type")
+
+        if form_type == 'upload_document':
+            try:
+                PersonnelDocument.objects.create(
+                    employee=employee,
+                    document_type=request.POST.get("document_type"),
+                    file_name=request.POST.get("file_name"),
+                    document=request.FILES.get("document"),
+                    notes=request.POST.get("notes", "")
+                )
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+        
+        elif form_type == 'delete_document':
+            try:
+                document_id = request.POST.get("doc_id")
+                doc = PersonnelDocument.objects.get(id=document_id, employee=employee)
+                doc.delete()
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+        
+        elif form_type == "update_employee":
+            try:
+                if current_is_hr:
+                    employee.first_name = request.POST.get("first_name")
+                    employee.last_name = request.POST.get("surname")
+                    employee.contact_number = request.POST.get("contact_number")
+                    employee.email = request.POST.get("email")
+                    employee.join_date = request.POST.get('service_start_date')
+                    employee.save()
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == "update_personal":
+            try:
+                personal.date_of_birth = request.POST.get("dob")
+                personal.gender = request.POST.get("gender")
+                personal.contact_telephone = request.POST.get("phone")
+                personal.address = request.POST.get("address")
+                personal.country_of_birth = request.POST.get("country_of_birth")
+                personal.marital_status = request.POST.get("marital_status")
+                personal.highest_education = request.POST.get("highest_education")
+                personal.nationality = request.POST.get("nationality")
+                personal.allergies = request.POST.get("allergies")
+
+                if current_is_hr:
+                    personal.working_rights = request.POST.get("working_rights")
+
+                personal.save()
+
+                ec_name = request.POST.get("ec_name")
+                if ec_name:
+                    if emergency_contacts:
+                        emergency_contacts.name = ec_name
+                        emergency_contacts.relationship = request.POST.get("ec_relationship")
+                        emergency_contacts.contact_number = request.POST.get("ec_phone")
+                        emergency_contacts.save()
+                    else:
+                        EmergencyContact.objects.create(
+                            employee=employee,
+                            name=ec_name,
+                            relationship=request.POST.get("ec_relationship"),
+                            contact_number=request.POST.get("ec_phone")
+                        )
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == "add_education":
+            try:
+                Education.objects.create(
+                    employee=employee,
+                    institution=request.POST.get("institution"),
+                    degree_course=request.POST.get("degree"),
+                    from_date=request.POST.get("start_date"),
+                    to_date=request.POST.get("end_date") or None,
+                    certificate=request.FILES.get("certificate"),
+                    department = request.POST.get('department'),
+                    grade = request.POST.get('grade')
+                )
+            except Exception as e:
+                print(f"Error: {e}")
+            if employee_id:
+                return redirect(f'/masters/employee-profile/{employee.employee_id}/?section=education&accordion=edu')
+            else:
+                return redirect('/masters/employee-profile/?section=education&accordion=edu')
+        
+        elif form_type == "delete_education":
+            try:
+                education_id = request.POST.get("education_id")
+                edu = Education.objects.get(id=education_id, employee=employee)
+                edu.delete()
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == "add_external_experience":
+            try:
+                ExternalExperience.objects.create(
+                    employee=employee,
+                    company=request.POST.get("company"),
+                    job_title=request.POST.get("job_title"),
+                    department=request.POST.get("department"),
+                    from_date=request.POST.get("start_date"),
+                    to_date=request.POST.get("end_date") or None,
+                    is_current=not request.POST.get("end_date"),
+                    responsibilities=request.POST.get("responsibilities", "")
+                )
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+        
+        elif form_type == "delete_external_experience":
+            try:
+                experience_id = request.POST.get("experience_id")
+                exp = ExternalExperience.objects.get(id=experience_id, employee=employee)
+                exp.delete()
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == "add_training":
+            try:
+                Training.objects.create(
+                    employee=employee,
+                    training_name=request.POST.get("training_name"),
+                    provider=request.POST.get("provider"),
+                    subject_matter=request.POST.get("subject_matter"),
+                    from_date=request.POST.get("start_date"),
+                    to_date=request.POST.get("end_date") or None,
+                    status=request.POST.get("status", "Completed"),
+                    certificate=request.FILES.get("certificate")
+                )
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == "delete_training":
+            try:
+                training_id = request.POST.get("training_id")
+                training = Training.objects.get(id=training_id, employee=employee)
+                training.delete()
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == "add_certification":
+            try:
+                expiry_date = request.POST.get("expiry_date") or None
+                Certification.objects.create(
+                    employee=employee,
+                    certification_name=request.POST.get("certificate_name"),
+                    issuing_organization=request.POST.get("issuing_org"),
+                    subject_matter=request.POST.get("subject_matter"),
+                    from_date=request.POST.get("issue_date"),
+                    validity_period=expiry_date,
+                    does_not_expire=not expiry_date,
+                    certificate=request.FILES.get("certificate_file")
+                )
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == "delete_certification":
+            try:
+                certification_id = request.POST.get("certification_id")
+                cert = Certification.objects.get(id=certification_id, employee=employee)
+                cert.delete()
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+
+        elif form_type == 'add_internal_experience':
+            try:
+                position_title = request.POST.get('position_title')
+                department_id = request.POST.get('department')
+                grading_id = request.POST.get('grading')
+                from_date = request.POST.get('from_date')
+                to_date = request.POST.get('to_date') or None
+                is_current = request.POST.get('is_current') == 'true'
+                presentation_reason = request.POST.get('presentation_reason', '')
+                comments = request.POST.get('comments', '')
+                final_comments = request.POST.get('final_comments', '')
+                responsibilities = request.POST.get('responsibilities', '')
+                
+                presentation_doc = request.FILES.get('presentation_doc')
+                results_doc = request.FILES.get('results_doc')
+
+                if is_current:
+                    InternalExperience.objects.filter(
+                        employee=employee,
+                        is_current=True
+                    ).update(is_current=False, to_date=from_date)
+                
+                department = Department.objects.get(pk=department_id) if department_id else None
+                grading = Grading.objects.get(pk=grading_id) if grading_id else None
+
+                InternalExperience.objects.create(
+                    employee=employee,
+                    position_title=position_title,
+                    department=department,
+                    grading=grading,
+                    from_date=from_date,
+                    to_date=to_date,
+                    is_current=is_current,
+                    presentation_reason=presentation_reason,
+                    comments=comments,
+                    final_comments=final_comments,
+                    responsibilities=responsibilities,
+                    presentation_document=presentation_doc,
+                    results_document=results_doc
+                )
+            except Exception as e:
+                print(f"Error: {e}")
+            return redirect('masters:emp_profile_view', employee_id=employee.employee_id) if employee_id else redirect('masters:emp_profile')
+            
+    context = {
+        'employee': employee,
+        'personal': personal,
+        'emergency_contacts': emergency_contacts,
+        'documents': documents,
+        'education': education,
+        'external_experience': external_experience,
+        'certifications': certifications,
+        'trainings': trainings,
+        'internal_experience': internal_experience,
+        'current_grading': current_grading,   
+        'departments': Department.objects.all(),
+        'gradings': Grading.objects.all().order_by('grade_code'),
+        'current_is_hr': current_is_hr  ,
+        'synnex_experience': synnex_experience,
+        'total_experience': total_experience,
+    }
+
+    return render(request, "profile/profile.html", context)

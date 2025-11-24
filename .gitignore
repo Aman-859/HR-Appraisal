@@ -15,14 +15,14 @@ ENV/
 *.pot
 *.pyc
 *.py~
-*.sqlite3-journal
-db.sqlite3-journal
-local_settings.py
-media/
-staticfiles/
-static_root/
-static_cdn/
-media_cdn/
+# *.sqlite3-journal
+# db.sqlite3-journal
+# local_settings.py
+# media/
+# staticfiles/
+# static_root/
+# static_cdn/
+# media_cdn/
 
 # If you want to keep your database file (db.sqlite3), DO NOT ignore it.
 # So, don't add "db.sqlite3" here.
@@ -51,3 +51,9 @@ docker-compose.override.yml
 *.bak
 *.tmp
 *.cache
+*.pyc
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

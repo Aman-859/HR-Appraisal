@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Employee, Role, Department,Country,State,City,EmployeeObjective,EmployeeKRA,AppraisalForm
+from .models import *
 
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = ("employee_id", "first_name", "last_name", "email", "role", "user", "status")
@@ -15,6 +15,12 @@ admin.site.register(City)
 admin.site.register(EmployeeObjective)
 admin.site.register(EmployeeKRA)
 admin.site.register(AppraisalForm)
+admin.site.register(EmployeePersonalDetails)
+admin.site.register(PersonnelDocument)
+admin.site.register(EmergencyContact)
+admin.site.register(Education)
+admin.site.register(InternalExperience)
+admin.site.register(Grading)
 
 
 # Register your models here.

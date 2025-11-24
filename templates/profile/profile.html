@@ -1,0 +1,1305 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Profile</title>
+    <link rel="stylesheet" href=" {% static 'css/profile.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+    .btn-toggle-all {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-toggle-all:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+    }
+
+    .btn-toggle-all:active {
+        transform: translateY(0);
+    }
+
+    .btn-toggle-all.active-toggle {
+        background: #0056b3;
+        box-shadow: 0 2px 8px rgba(0, 86, 179, 0.3);
+    }
+
+    .btn-toggle-all.active-toggle:hover {
+        box-shadow: 0 4px 12px rgba(0, 86, 179, 0.4);
+    }
+</style>
+</head>
+<body>
+
+    <main class="container main-content" style="width: 90%;">
+        <div class="page-wrapper" style="padding: 20px;"> 
+        
+        <!-- Profile Summary -->
+        <section class="profile-card improved-card">
+            <div class="profile-left">
+                <div class="avatar-box">
+                    <div class="avatar-circle"> {{ employee.first_name|first }}{{ employee.last_name|first }}</div>
+                    <div class="rating"></div>
+                </div>
+
+                <div class="basic-info">
+                    <h1 class="emp-name">{{ employee.first_name }} {{ employee.last_name }}</h1>
+                    <p class="emp-position">{{ employee.role.role_name }}</p>
+                    <p class="emp-dept">Department:  {{ employee.department.name }}</p>
+                    <p class="emp-id">Employee ID: {{ employee.employee_id }}</p>
+                </div>
+            </div>
+
+            <div class="profile-right">
+                <div class="stat-block">
+                    <span class="stat-label">Joining Date</span>
+                    <span class="stat-value">{{employee.join_date}}</span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">Gender</span>
+                    <span class="stat-value">{{ personal.get_gender_display|default:"N/A" }}</span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">Service at Synnex</span>
+                    <span class="stat-value">{{synnex_experience}}</span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">Total Experience</span>
+                    <span class="stat-value">{{total_experience}}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Toggle All Button -->
+        <div style="display: flex; justify-content: flex-end; margin: 1.5rem 0;">
+            <button type="button" id="toggle-all-accordions" class="btn-toggle-all">
+                <i class="fa-solid fa-expand"></i> Expand All
+            </button>
+        </div>
+
+        <div class="accordion">
+            
+            <!-- Employee Details -->
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" aria-expanded="false" aria-controls="section-employee">
+                    <span class="accordion-title">Employee Details</span>
+                    <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="section-employee" class="accordion-content">
+                    
+                    <div id="employee-details-view">
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                            {% if role_name == 'hr admin' %}
+                            <button type="button" id="btn-edit-employee" class="btn btn-outline">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Employee ID</span>
+                                <span class="detail-value">{{ employee.employee_id }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Position</span>
+                                <span class="detail-value">{{ employee.role.role_name|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">First Name</span>
+                                <span class="detail-value">{{ employee.first_name }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Surname</span>
+                                <span class="detail-value">{{ employee.last_name }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Department</span>
+                                <span class="detail-value">{{ employee.department.name|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Service Start Date</span>
+                                <span class="detail-value">{{ employee.join_date|date:"d/m/Y"|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Grading</span>
+                                <span class="detail-value">{{current_grading}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Employee ID Number</span>
+                                <span class="detail-value">{{ employee.employee_id }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Gender</span>
+                                <span class="detail-value">{{ employee.gender|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Contact Number</span>
+                                <span class="detail-value">{{ employee.contact_number|default:"N/A" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value">{{ employee.email }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="employee-details-edit" style="display: none;">
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="update_employee">
+                            <div class="form-grid three-cols">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Employee ID</label>
+                                    <input type="text" name="employee_id" class="form-input" value="{{ employee.employee_id }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Position</label>
+                                    <input type="text" name="position" class="form-input" value="{{ employee.role.role_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">First Name</label>
+                                    <input type="text" name="first_name" class="form-input" value="{{ employee.first_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Surname</label>
+                                    <input type="text" name="surname" class="form-input" value="{{ employee.last_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Department</label>
+                                    <input type="text" name="department" class="form-input" value="{{ employee.department.name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Service Start Date</label>
+                                    <input type="date" name="service_start_date" class="form-input" value="{{ employee.join_date|date:'Y-m-d' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Grading</label>
+                                    <input type="text" name="grading" class="form-input" value="{{ employee.grading.grade_code }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Employee ID Number</label>
+                                    <input type="text" name="employee_id_number" class="form-input" value="{{ employee.employee_id }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Gender</label>
+                                    <select name="gender" class="form-select">
+                                        <option value="Male" {% if employee.gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if employee.gender == 'Female' %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if employee.gender == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Contact Number</label>
+                                    <input type="tel" name="contact_number" class="form-input" value="{{ employee.contact_number }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Email</label>
+                                    <input type="email" name="email" class="form-input" value="{{ employee.email }}">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" id="btn-cancel-employee" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Personnel Documents -->
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" aria-expanded="false" aria-controls="section-docs">
+                    <span class="accordion-title">Personnel Documents</span>
+                    <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="section-docs" class="accordion-content">
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Document Type</th>
+                                    <th>File Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documents %}
+                                <tr>
+                                    <td>{{ doc.upload_date }}</td>
+                                    <td>{{ doc.document_type }}</td>
+                                    <td>{{ doc.file_name }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{{ doc.document.url }}" target="_blank" class="btn-icon" title="View"><i class="fa-solid fa-eye"></i></a>
+                                            <a href="{{ doc.document.url }}" download class="btn-icon" title="Download"><i class="fa-solid fa-download"></i></a>
+                                            <form action="" method="POST" style="display:inline;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="form_type" value="delete_document">
+                                                <input type="hidden" name="doc_id" value="{{ doc.id }}">
+                                                <button type="submit" class="btn-icon delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align:center; color:#888;">No documents uploaded yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button type="button" id="btn-show-doc-form" class="btn btn-outline" style="margin-top: 20px;">
+                        <i class="fa-solid fa-upload"></i>  
+                    </button>
+
+                    <div id="doc-form-container" style="display: none; margin-top: 20px;">
+                        <form action="" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="upload_document">
+                            <h4 style="margin-bottom: 1rem; font-weight: 700;">Upload New Document</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Document Type</label>
+                                    <select name="document_type" class="form-select">
+                                        <option value="">Select Document Type</option>
+                                        <option value="Resume">Resume</option>
+                                        <option value="Application Form">Application Form</option>
+                                        <option value="Aptitude Test">Aptitude Test</option>
+                                        <option value="Interview Guide">Interview Guide</option>
+                                        <option value="Presentation">Presentation</option>
+                                        <option value="Training Checklist">Training Checklist</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">File Name</label>
+                                    <input type="text" name="file_name" class="form-input" placeholder="Enter file name">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label class="form-label" style="font-weight: 600;">Select File to Upload</label>
+                                    <div class="file-upload-wrapper">
+                                        <label class="file-upload-btn">
+                                            Choose File
+                                            <input type="file" name="document" id="doc-upload-input">
+                                        </label>
+                                        <span class="file-name" id="doc-file-name">No file chosen</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions" style="margin-top: 1rem;">
+                                <button type="button" id="btn-cancel-doc-form" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Upload Document</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education & Work Experience -->
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" aria-expanded="false" aria-controls="section-edu">
+                    <span class="accordion-title">Education & Work Experience</span>
+                    <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="section-edu" class="accordion-content">
+                    
+                    <div class="tabs">
+                        <button type="button" class="tab-btn active" data-tab="education">Courses Completed</button>
+                        <button type="button" class="tab-btn" data-tab="external">External Experience</button>
+                        <button type="button" class="tab-btn" data-tab="internal">Internal Experience (Synnex)</button>
+                    </div>
+
+                    <!-- Courses Completed -->
+                    <div id="tab-education" class="tab-content active">
+                        <div class="items-list" id="education-list">
+                            {% if education %}
+                                {% for edu in education %}
+                                <div class="item-card" style="position: relative;">
+                                    <div style="position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.5rem;">
+                                        {% if edu.certificate %}
+                                        <a href="{{ edu.certificate.url }}" target="_blank" class="btn-icon" title="View Certificate"><i class="fa-solid fa-eye"></i></a>
+                                        {% endif %}
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this education record?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_education">
+                                            <input type="hidden" name="education_id" value="{{ edu.id }}">
+                                            <button type="submit" class="btn-icon delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                    
+                                    <div style="padding: 1rem; padding-right: 4rem;">
+                                        <h4 style="margin: 0 0 0.5rem 0; font-weight: 700;">{{ edu.degree_course }}</h4>
+                                        <p style="margin: 0.25rem 0;"><strong>Institution:</strong> {{ edu.institution }}</p>
+                                        <p style="margin: 0.25rem 0;"><strong>Period:</strong> {{ edu.from_date|date:"d/m/Y" }} - {% if edu.to_date %}{{ edu.to_date|date:"d/m/Y" }}{% else %}Present{% endif %}</p>
+                                        {% if edu.department %}
+                                        <p style="margin: 0.25rem 0;"><strong>Department:</strong> {{ edu.department }}</p>
+                                        {% endif %}
+                                        {% if edu.grade %}
+                                        <p style="margin: 0.25rem 0;"><strong>Grade:</strong> {{ edu.grade }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="item-card">
+                                    <div style="padding: 1rem; text-align: center; color: #6c757d;">
+                                        <p style="margin: 0;">No education records found.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="button" class="btn btn-outline toggle-form-btn" data-target="add-education-form" style="margin-top: 20px;">+ Add Education</button>
+
+                        <div id="add-education-form" class="add-form-container" style="display: none; margin-top: 20px;">
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_education">
+                                <h4 style="margin-bottom: 1rem; font-weight: 700;">Add New Education</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Institution Name</label>
+                                        <input type="text" name="institution" class="form-input" placeholder="Enter institution name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Degree/Course Name</label>
+                                        <input type="text" name="degree" class="form-input" placeholder="Enter degree/course" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Department</label>
+                                        <input type="text" name="department" class="form-input" placeholder="Enter department">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Start Date</label>
+                                        <input type="date" name="start_date" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">End Date</label>
+                                        <input type="date" name="end_date" class="form-input">
+                                        <small style="font-size: 12px; color: #6c757d;">Leave blank if currently studying</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Grade</label>
+                                        <input type="text" name="grade" class="form-input" placeholder="e.g., First Class, 3.8 GPA">
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label" style="font-weight: 600;">Upload Certificate/Transcript</label>
+                                        <div class="file-upload-wrapper">
+                                            <label class="file-upload-btn">
+                                                Choose File
+                                                <input type="file" name="certificate" id="edu-cert-input">
+                                            </label>
+                                            <span class="file-name" id="edu-cert-name">No file chosen</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="margin-top: 1rem;">
+                                    <button type="button" class="btn btn-secondary cancel-btn" data-target="add-education-form">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Add Education</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- External Experience -->
+                    <div id="tab-external" class="tab-content">
+                        <div class="items-list" id="external-list">
+                            {% if external_experience %}
+                                {% for exp in external_experience %}
+                                <div class="item-card" style="position: relative;">
+                                    <div style="position: absolute; top: 0.5rem; right: 0.5rem;">
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this experience record?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_external_experience">
+                                            <input type="hidden" name="experience_id" value="{{ exp.id }}">
+                                            <button type="submit" class="btn-icon delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                    
+                                    <div style="padding: 1rem; padding-right: 3rem;">
+                                        <h4 style="margin: 0 0 0.5rem 0; font-weight: 700;">{{ exp.job_title }}</h4>
+                                        <p style="margin: 0.25rem 0;"><strong>Company:</strong> {{ exp.company }}</p>
+                                        <p style="margin: 0.25rem 0;"><strong>Period:</strong> {{ exp.from_date|date:"d/m/Y" }} - {% if exp.to_date %}{{ exp.to_date|date:"d/m/Y" }}{% else %}Present{% endif %}</p>
+                                        {% if exp.department %}
+                                        <p style="margin: 0.25rem 0;"><strong>Department:</strong> {{ exp.department }}</p>
+                                        {% endif %}
+                                        {% if exp.responsibilities %}
+                                        <p style="margin: 0.5rem 0 0 0;"><strong>Responsibilities:</strong> {{ exp.responsibilities }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="item-card">
+                                    <div style="padding: 1rem; text-align: center; color: #6c757d;">
+                                        <p style="margin: 0;">No external experience records found.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="button" class="btn btn-outline toggle-form-btn" data-target="add-external-form" style="margin-top: 20px;">+ Add External Experience</button>
+
+                        <div id="add-external-form" class="add-form-container" style="display: none; margin-top: 20px;">
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_external_experience">
+                                <h4 style="margin-bottom: 1rem; font-weight: 700;">Add External Experience</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Company Name</label>
+                                        <input type="text" name="company" class="form-input" placeholder="Enter company name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Job Title</label>
+                                        <input type="text" name="job_title" class="form-input" placeholder="Enter job title" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Department</label>
+                                        <input type="text" name="department" class="form-input" placeholder="Enter department">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Start Date</label>
+                                        <input type="date" name="start_date" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">End Date</label>
+                                        <input type="date" name="end_date" class="form-input">
+                                        <small style="font-size: 12px; color: #6c757d;">Leave blank if current position</small>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label" style="font-weight: 600;">Responsibilities</label>
+                                        <textarea name="responsibilities" class="form-textarea" rows="3" placeholder="Describe your responsibilities"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="margin-top: 1rem;">
+                                    <button type="button" class="btn btn-secondary cancel-btn" data-target="add-external-form">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Add Experience</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Internal Experience (Synnex) -->
+                    <div id="tab-internal" class="tab-content">
+                        <div class="items-list" id="internal-list">
+                            {% if internal_experience %}
+                                {% for exp in internal_experience %}
+                                <div class="item-card">
+                                    <div style="padding: 1rem;">
+                                        <h4 style="margin: 0 0 0.5rem 0; font-weight: 700;">
+                                            {{ exp.position_title }}
+                                            {% if exp.is_current %}
+                                            <span style="background: #28a745; color: white; padding: 0.2rem 0.6rem; border-radius: 15px; font-size: 11px; font-weight: 600; margin-left: 0.5rem;">CURRENT</span>
+                                            {% endif %}
+                                        </h4>
+                                        <p style="margin: 0.25rem 0;"><strong>Period:</strong> {{ exp.from_date|date:"d/m/Y" }} - {% if exp.to_date %}{{ exp.to_date|date:"d/m/Y" }}{% else %}Present{% endif %}</p>
+                                        {% if exp.department %}
+                                        <p style="margin: 0.25rem 0;"><strong>Department:</strong> {{ exp.department.name }}</p>
+                                        {% endif %}
+                                        {% if exp.grading %}
+                                        <p style="margin: 0.25rem 0;"><strong>Grade:</strong> {{ exp.grading.grade_code }}</p>
+                                        {% endif %}
+                                        {% if exp.presentation_reason %}
+                                        <p style="margin: 0.25rem 0;"><strong>Change Type:</strong> {{ exp.presentation_reason }}</p>
+                                        {% endif %}
+                                        {% if exp.responsibilities %}
+                                        <p style="margin: 0.5rem 0 0 0;"><strong>Responsibilities:</strong> {{ exp.responsibilities }}</p>
+                                        {% endif %}
+                                        {% if exp.comments %}
+                                        <p style="margin: 0.5rem 0 0 0;"><strong>Comments:</strong> {{ exp.comments }}</p>
+                                        {% endif %}
+                                        {% if exp.final_comments %}
+                                        <p style="margin: 0.5rem 0 0 0;"><strong>Final Comments:</strong> {{ exp.final_comments }}</p>
+                                        {% endif %}
+                                        {% if exp.presentation_document %}
+                                        <p style="margin: 0.5rem 0 0 0;">
+                                            <strong>Presentation:</strong> 
+                                            <a href="{{ exp.presentation_document.url }}" target="_blank" style="color: #007bff;">View Document</a>
+                                        </p>
+                                        {% endif %}
+                                        {% if exp.results_document %}
+                                        <p style="margin: 0.25rem 0;">
+                                            <strong>Results:</strong> 
+                                            <a href="{{ exp.results_document.url }}" target="_blank" style="color: #007bff;">View Document</a>
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="item-card">
+                                    <div style="padding: 1rem; text-align: center; color: #6c757d;">
+                                        <p style="margin: 0;">No internal experience records found.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if role_name == 'hr admin' %}
+                        <button type="button" class="btn btn-outline toggle-form-btn" data-target="add-internal-form" style="margin-top: 20px;">+ Add Internal Experience</button>
+                        {% endif %}
+                         
+                        <div id="add-internal-form" class="add-form-container" style="display: none; margin-top: 20px;">
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_internal_experience">
+                                <h4 style="margin-bottom: 1rem; font-weight: 700;">Internal Role and Grading Review</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Position Title</label>
+                                        <input type="text" name="position_title" class="form-input" placeholder="e.g., Team Leader, HR Manager" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Department</label>
+                                        <select name="department" class="form-select" required>
+                                            <option value="">Select Department</option>
+                                            {% for dept in departments %}
+                                            <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Grading</label>
+                                        <select name="grading" class="form-select" required>
+                                            <option value="">Select Grade</option>
+                                            {% for grade in gradings %}
+                                            <option value="{{ grade.id }}">{{ grade.grade_code }} - {{ grade.grade_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">From Date</label>
+                                        <input type="date" name="from_date" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">To Date</label>
+                                        <input type="date" name="to_date" class="form-input">
+                                        <small style="font-size: 12px; color: #6c757d;">Leave blank if current position</small>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                            <input type="checkbox" name="is_current" value="true" style="width: auto;">
+                                            <span style="font-weight: 600;">Current Position</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Presentation Reason</label>
+                                        <select name="presentation_reason" class="form-select">
+                                            <option value="">Select Reason</option>
+                                            <option value="Promotion">Promotion</option>
+                                            <option value="Transfer">Transfer</option>
+                                            <option value="Grading Review">Grading Review</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label" style="font-weight: 600;">Comments</label>
+                                        <textarea name="comments" class="form-textarea" rows="3" placeholder="Enter comments about this position change"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Upload Presentation Document</label>
+                                        <div class="file-upload-wrapper">
+                                            <label class="file-upload-btn">
+                                                Choose File
+                                                <input type="file" name="presentation_doc" id="pres-doc-input">
+                                            </label>
+                                            <span class="file-name" id="pres-doc-name">No file chosen</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Upload Results/Comments Document</label>
+                                        <div class="file-upload-wrapper">
+                                            <label class="file-upload-btn">
+                                                Choose File
+                                                <input type="file" name="results_doc" id="results-doc-input">
+                                            </label>
+                                            <span class="file-name" id="results-doc-name">No file chosen</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label" style="font-weight: 600;">Final Comments (HR Admin)</label>
+                                        <textarea name="final_comments" class="form-textarea" rows="2" placeholder="Final approval comments"></textarea>
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label class="form-label" style="font-weight: 600;">Responsibilities</label>
+                                        <textarea name="responsibilities" class="form-textarea" rows="3" placeholder="Key responsibilities in this role"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="margin-top: 1rem;">
+                                    <button type="button" class="btn btn-secondary cancel-btn" data-target="add-internal-form">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Training & Certification -->
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" aria-expanded="false" aria-controls="section-training">
+                    <span class="accordion-title">Training & Certification</span>
+                    <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="section-training" class="accordion-content">
+                    
+                    <div class="tabs">
+                        <button type="button" class="tab-btn active" data-tab="training">Training Records</button>
+                        <button type="button" class="tab-btn" data-tab="certificate">Certification Records</button>
+                    </div>
+
+                    <!-- Training Records -->
+                    <div id="tab-training" class="tab-content active">
+                        <div class="items-list" id="training-list">
+                            {% if trainings %}
+                                {% for training in trainings %}
+                                <div class="item-card" style="position: relative;">
+                                    <div style="position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.5rem;">
+                                        {% if training.certificate %}
+                                        <a href="{{ training.certificate.url }}" target="_blank" class="btn-icon" title="View Certificate"><i class="fa-solid fa-eye"></i></a>
+                                        {% endif %}
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this training record?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_training">
+                                            <input type="hidden" name="training_id" value="{{ training.id }}">
+                                            <button type="submit" class="btn-icon delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                    
+                                    <div style="padding: 1rem; padding-right: 4rem;">
+                                        <h4 style="margin: 0 0 0.5rem 0; font-weight: 700;">{{ training.training_name }}</h4>
+                                        <p style="margin: 0.25rem 0;"><strong>Provider:</strong> {{ training.provider|default:"Not specified" }}</p>
+                                        {% if training.subject_matter %}
+                                        <p style="margin: 0.25rem 0;"><strong>Subject Matter:</strong> {{ training.subject_matter }}</p>
+                                        {% endif %}
+                                        <p style="margin: 0.25rem 0;"><strong>Period:</strong> {{ training.from_date|date:"d/m/Y" }} - {% if training.to_date %}{{ training.to_date|date:"d/m/Y" }}{% else %}Ongoing{% endif %}</p>
+                                        <p style="margin: 0.25rem 0;"><strong>Status:</strong> 
+                                            <span style="background: {% if training.status == 'Completed' %}#d4edda{% elif training.status == 'In Progress' %}#fff3cd{% else %}#cce5ff{% endif %}; 
+                                                        color: {% if training.status == 'Completed' %}#155724{% elif training.status == 'In Progress' %}#856404{% else %}#004085{% endif %}; 
+                                                        padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                                {{ training.status }}
+                                            </span>
+                                        </p>
+                                        {% if training.certificate %}
+                                        <p style="margin: 0.5rem 0 0 0;"><strong>Certificate:</strong> <a href="{{ training.certificate.url }}" target="_blank" style="color: #007bff;">View Document</a></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="item-card">
+                                    <div style="padding: 1rem; text-align: center; color: #6c757d;">
+                                        <p style="margin: 0;">No training records found.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="button" class="btn btn-outline toggle-form-btn" data-target="add-training-form" style="margin-top: 20px;">+ Add Training</button>
+
+                        <div id="add-training-form" class="add-form-container" style="display: none; margin-top: 20px;">
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_training">
+                                <h4 style="margin-bottom: 1rem; font-weight: 700;">Add New Training</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Training Name</label>
+                                        <input type="text" name="training_name" class="form-input" placeholder="Enter training name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Provider/Organizer</label>
+                                        <input type="text" name="provider" class="form-input" placeholder="Enter provider name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Subject Matter</label>
+                                        <input type="text" name="subject_matter" class="form-input" placeholder="Enter subject matter">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Start Date</label>
+                                        <input type="date" name="start_date" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">End Date</label>
+                                        <input type="date" name="end_date" class="form-input">
+                                        <small style="font-size: 12px; color: #6c757d;">Leave blank if ongoing</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Status</label>
+                                        <select name="status" class="form-select" required>
+                                            <option value="">Select Status</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="In Progress">In Progress</option>
+                                            <option value="Planned">Planned</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Upload Certificate</label>
+                                        <div class="file-upload-wrapper">
+                                            <label class="file-upload-btn">
+                                                Choose File
+                                                <input type="file" name="certificate" id="train-cert-input">
+                                            </label>
+                                            <span class="file-name" id="train-cert-name">No file chosen</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="margin-top: 1rem;">
+                                    <button type="button" class="btn btn-secondary cancel-btn" data-target="add-training-form">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Add Training</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Certification Records -->
+                    <div id="tab-certificate" class="tab-content">
+                        <div class="items-list" id="certificate-list">
+                            {% if certifications %}
+                                {% for cert in certifications %}
+                                <div class="item-card" style="position: relative;">
+                                    <div style="position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.5rem;">
+                                        {% if cert.certificate %}
+                                        <a href="{{ cert.certificate.url }}" target="_blank" class="btn-icon" title="View Certificate"><i class="fa-solid fa-eye"></i></a>
+                                        {% endif %}
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this certification record?');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_certification">
+                                            <input type="hidden" name="certification_id" value="{{ cert.id }}">
+                                            <button type="submit" class="btn-icon delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                    
+                                    <div style="padding: 1rem; padding-right: 4rem;">
+                                        <h4 style="margin: 0 0 0.5rem 0; font-weight: 700;">{{ cert.certification_name }}</h4>
+                                        <p style="margin: 0.25rem 0;"><strong>Issuing Organization:</strong> {{ cert.issuing_organization }}</p>
+                                        {% if cert.subject_matter %}
+                                        <p style="margin: 0.25rem 0;"><strong>Subject Matter:</strong> {{ cert.subject_matter }}</p>
+                                        {% endif %}
+                                        <p style="margin: 0.25rem 0;"><strong>Issue Date:</strong> {{ cert.from_date|date:"d/m/Y" }}</p>
+                                        <p style="margin: 0.25rem 0;"><strong>Expiry:</strong> 
+                                            {% if cert.does_not_expire %}
+                                                <span style="background: #d4edda; color: #155724; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 11px; font-weight: 600;">No Expiry</span>
+                                            {% elif cert.validity_period %}
+                                                {{ cert.validity_period|date:"d/m/Y" }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </p>
+                                        {% if cert.certificate %}
+                                        <p style="margin: 0.5rem 0 0 0;"><strong>Certificate:</strong> <a href="{{ cert.certificate.url }}" target="_blank" style="color: #007bff;">View Document</a></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="item-card">
+                                    <div style="padding: 1rem; text-align: center; color: #6c757d;">
+                                        <p style="margin: 0;">No certification records found.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="button" class="btn btn-outline toggle-form-btn" data-target="add-certificate-form" style="margin-top: 20px;">+ Add Certificate</button>
+
+                        <div id="add-certificate-form" class="add-form-container" style="display: none; margin-top: 20px;">
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="add_certification">
+                                <h4 style="margin-bottom: 1rem; font-weight: 700;">Add New Certificate</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Certification Name</label>
+                                        <input type="text" name="certificate_name" class="form-input" placeholder="Enter certification name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Issuing Organization</label>
+                                        <input type="text" name="issuing_org" class="form-input" placeholder="Enter organization name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Subject Matter</label>
+                                        <input type="text" name="subject_matter" class="form-input" placeholder="Enter subject matter">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Issue Date</label>
+                                        <input type="date" name="issue_date" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Expiry/Validity Date</label>
+                                        <input type="date" name="expiry_date" class="form-input">
+                                        <small style="font-size: 12px; color: #6c757d;">Leave blank if no expiry</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" style="font-weight: 600;">Upload Certificate</label>
+                                        <div class="file-upload-wrapper">
+                                            <label class="file-upload-btn">
+                                                Choose File
+                                                <input type="file" name="certificate_file" id="cert-file-input">
+                                            </label>
+                                            <span class="file-name" id="cert-file-name">No file chosen</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="margin-top: 1rem;">
+                                    <button type="button" class="btn btn-secondary cancel-btn" data-target="add-certificate-form">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Add Certification</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Personal Details - Profile -->
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" aria-expanded="false" aria-controls="section-personal">
+                    <span class="accordion-title">Personal Details - Profile</span>
+                    <svg class="accordion-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="section-personal" class="accordion-content">
+                    
+                    <div id="personal-details-view">
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                            <button type="button" id="btn-edit-personal" class="btn btn-outline">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Date of Birth</span>
+                                <span class="detail-value">{{personal.date_of_birth}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Gender</span>
+                                <span class="detail-value">{{personal.gender}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Contact Telephone</span>
+                                <span class="detail-value">{{personal.contact_telephone}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Address</span>
+                                <span class="detail-value">{{personal.address}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Country of Birth</span>
+                                <span class="detail-value">{{personal.country_of_birth}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Marital Status</span>
+                                <span class="detail-value">{{personal.marital_status}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Highest Level of Education</span>
+                                <span class="detail-value">{{personal.highest_education}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Nationality</span>
+                                <span class="detail-value">{{personal.nationality}}</span>
+                            </div>
+                             
+                            <div class="detail-item">
+                                <span class="detail-label" aria-disabled="true">Working Rights</span>
+                                <span class="detail-value">{{personal.working_rights}}</span>
+                            </div>
+                             
+                            
+                            <div class="detail-section-header full-width" style="margin-top: 2rem; font-weight: 700;">Emergency Contact</div>
+                            
+                            <div class="detail-item">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-value">{{emergency_contacts.name}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Relationship</span>
+                                <span class="detail-value">{{emergency_contacts.relationship}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Contact Number</span>
+                                <span class="detail-value">{{emergency_contacts.contact_number}}</span>
+                            </div>
+                            
+                            <div class="detail-section-header full-width" style="margin-top: 2rem; font-weight: 700;">Medical</div>
+                            
+                            <div class="detail-item full-width">
+                                <span class="detail-label">Allergies</span>
+                                <span class="detail-value">{{personal.allergies}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="personal-details-edit" style="display: none;">
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="update_personal">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Date of Birth</label>
+                                    <input type="date" name="dob" class="form-input" value="{{ personal.date_of_birth|date:'Y-m-d' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Gender</label>
+                                    <select name="gender" class="form-select">
+                                        <option value="Male" {% if personal.gender == "Male" %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if personal.gender == "Female" %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if personal.gender == "Other" %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Contact Telephone</label>
+                                    <input type="tel" name="phone" class="form-input" value="{{personal.contact_telephone}}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Address</label>
+                                    <input type="text" name="address" class="form-input" value="{{personal.address}}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Country of Birth</label>
+                                    <select name="country_of_birth" class="form-select">
+                                        <option value="India" {% if personal.country_of_birth == "India" %}selected{% endif %}>India</option>
+                                        <option value="New Zealand" {% if personal.country_of_birth == "New Zealand" %}selected{% endif %}>New Zealand</option>
+                                        <option value="Australia" {% if personal.country_of_birth == "Australia" %}selected{% endif %}>Australia</option>
+                                        <option value="USA" {% if personal.country_of_birth == "USA" %}selected{% endif %}>USA</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Marital Status</label>
+                                    <select name="marital_status" class="form-select">
+                                        <option value="Single" {% if personal.marital_status == "Single" %}selected{% endif %}>Single</option>
+                                        <option value="Married" {% if personal.marital_status == "Married" %}selected{% endif %}>Married</option>
+                                        <option value="Divorced" {% if personal.marital_status == "Divorced" %}selected{% endif %}>Divorced</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Highest Level of Education</label>
+                                    <select name="highest_education" class="form-select">
+                                        <option value="High School" {% if personal.highest_education == "High School" %}selected{% endif %}>High School</option>
+                                        <option value="Diploma" {% if personal.highest_education == "Diploma" %}selected{% endif %}>Diploma</option>
+                                        <option value="Bachelor" {% if personal.highest_education == "Bachelor" %}selected{% endif %}>Bachelor's Degree</option>
+                                        <option value="Master" {% if personal.highest_education == "Master" %}selected{% endif %}>Master's Degree</option>
+                                        <option value="Doctorate" {% if personal.highest_education == "Doctorate" %}selected{% endif %}>PhD</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Nationality</label>
+                                    <select name="nationality" class="form-select">
+                                        <option value="Indian" {% if personal.nationality == "Indian" %}selected{% endif %}>Indian</option>
+                                        <option value="New Zealander" {% if personal.nationality == "New Zealander" %}selected{% endif %}>New Zealander</option>
+                                        <option value="American" {% if personal.nationality == "American" %}selected{% endif %}>American</option>
+                                        <option value="Australian" {% if personal.nationality == "Australian" %}selected{% endif %}>Australian</option>
+                                    </select>
+                                </div>
+                                {% if role_name == 'hr admin' %}
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Working Rights (HR Admin Only)</label>
+                                    <input type="text" name="working_rights" class="form-input" value="{{personal.working_rights}}">
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <h3 style="margin-top: 2rem; margin-bottom: 1rem; font-size: 16px; font-weight: 700;">Emergency Contact</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Name</label>
+                                    <input type="text" name="ec_name" class="form-input" value="{{emergency_contacts.name}}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Relationship</label>
+                                    <select name="ec_relationship" class="form-select">
+                                        <option value="Parent" {% if emergency_contacts.relationship == "Parent" %}selected{% endif %}>Parent</option>
+                                        <option value="Spouse" {% if emergency_contacts.relationship == "Spouse" %}selected{% endif %}>Spouse</option>
+                                        <option value="Sibling" {% if emergency_contacts.relationship == "Sibling" %}selected{% endif %}>Sibling</option>
+                                        <option value="Friend" {% if emergency_contacts.relationship == "Friend" %}selected{% endif %}>Friend</option>
+                                        <option value="Other" {% if emergency_contacts.relationship == "Other" %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-weight: 600;">Contact Telephone Number</label>
+                                    <input type="tel" name="ec_phone" class="form-input" value="{{emergency_contacts.contact_number}}">
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width" style="margin-top: 1rem;">
+                                <label class="form-label" style="font-weight: 600;">Allergies</label>
+                                <textarea name="allergies" class="form-textarea" rows="2" placeholder="{{personal.allergies}}"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="btn-cancel-personal" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          const accordions = document.querySelectorAll(".accordion-header");
+          
+          accordions.forEach(function(acc) { 
+            acc.setAttribute("aria-expanded", "false");
+          });
+
+          accordions.forEach(function(accordion) {
+            accordion.addEventListener("click", function() {
+              const isExpanded = accordion.getAttribute("aria-expanded") === "true";
+              accordion.setAttribute("aria-expanded", !isExpanded);
+            });
+
+            accordion.addEventListener("keydown", function(e) {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                accordion.click();
+              }
+            });
+          });
+
+          const toggleAllBtn = document.getElementById("toggle-all-accordions");
+          
+          if (toggleAllBtn) {
+            toggleAllBtn.addEventListener("click", function() {
+              const allAccordions = document.querySelectorAll(".accordion-header");
+              const firstAccordion = allAccordions[0];
+              const isCurrentlyExpanded = firstAccordion.getAttribute("aria-expanded") === "true";
+              
+              allAccordions.forEach(function(accordion) {
+                accordion.setAttribute("aria-expanded", !isCurrentlyExpanded);
+              });
+
+              if (!isCurrentlyExpanded) {
+                toggleAllBtn.innerHTML = '<i class="fa-solid fa-compress"></i> Collapse All';
+                toggleAllBtn.classList.add('active-toggle');
+                toggleAllBtn.style.background = '#007bff'
+              } else {
+                toggleAllBtn.innerHTML = '<i class="fa-solid fa-expand"></i> Expand All';
+                toggleAllBtn.classList.remove('active-toggle');
+                toggleAllBtn.style.background = '#007bff'
+              }
+            });
+          }
+
+          const fileInputs = document.querySelectorAll('input[type="file"]');
+
+          fileInputs.forEach(function(input) {
+            input.addEventListener("change", function(e) {
+              const files = e.target.files;
+              let fileNameDisplay = null;
+
+              if (input.id) {
+                const displayMap = {
+                  'doc-upload-input': 'doc-file-name',
+                  'edu-cert-input': 'edu-cert-name',
+                  'train-cert-input': 'train-cert-name',
+                  'cert-file-input': 'cert-file-name',
+                  'pres-doc-input': 'pres-doc-name',
+                  'results-doc-input': 'results-doc-name'
+                };
+
+                const displayId = displayMap[input.id];
+                if (displayId) {
+                  fileNameDisplay = document.getElementById(displayId);
+                }
+              }
+
+              if (!fileNameDisplay) {
+                const wrapper = input.closest('.file-upload-wrapper');
+                if (wrapper) {
+                  fileNameDisplay = wrapper.querySelector('.file-name');
+                }
+              }
+
+              if (fileNameDisplay) {
+                if (files.length > 0) {
+                  fileNameDisplay.textContent = files[0].name;
+                  fileNameDisplay.style.color = '#2c3e50';
+                  fileNameDisplay.style.fontWeight = '500';
+                } else {
+                  fileNameDisplay.textContent = 'No file chosen';
+                  fileNameDisplay.style.color = '#6c757d';
+                  fileNameDisplay.style.fontWeight = '400';
+                }
+              }
+            });
+          });
+
+          const forms = document.querySelectorAll("form");
+          forms.forEach(function(form) {
+            form.addEventListener("submit", function(e) {
+              console.log("Form submitted to: " + form.getAttribute("action"));
+            });
+          });
+
+          const deleteButtons = document.querySelectorAll(".btn-icon.delete");
+          deleteButtons.forEach(function(btn) {
+            btn.addEventListener("click", function(e) {
+              if (confirm("Are you sure you want to delete this item?")) {
+                const row = e.target.closest("tr") || e.target.closest(".item-card");
+                row.style.opacity = "0.5";
+                setTimeout(function() { row.remove(); }, 300);
+              }
+            });
+          });
+
+          const tabGroups = document.querySelectorAll(".tabs");
+
+          tabGroups.forEach(function(group) {
+            const btns = group.querySelectorAll(".tab-btn");
+
+            btns.forEach(function(btn) {
+              btn.addEventListener("click", function() {
+                const container = group.parentElement;
+
+                btns.forEach(function(b) { b.classList.remove("active"); });
+                const contents = container.querySelectorAll(".tab-content");
+                contents.forEach(function(c) { c.classList.remove("active"); });
+
+                btn.classList.add("active");
+
+                const tabId = btn.getAttribute("data-tab");
+                const targetContent = document.getElementById("tab-" + tabId);
+                if (targetContent) targetContent.classList.add("active");
+              });
+            });
+          });
+
+          const toggleBtns = document.querySelectorAll(".toggle-form-btn");
+          const cancelBtns = document.querySelectorAll(".cancel-btn");
+
+          toggleBtns.forEach(function(btn) {
+            btn.addEventListener("click", function() {
+              const targetId = btn.getAttribute("data-target");
+              const form = document.getElementById(targetId);
+              if (form) {
+                form.style.display = "block";
+                btn.style.display = "none";
+              }
+            });
+          });
+
+          cancelBtns.forEach(function(btn) {
+            btn.addEventListener("click", function() {
+              const targetId = btn.getAttribute("data-target");
+              const form = document.getElementById(targetId);
+              if (form) {
+                form.style.display = "none";
+                const formElement = form.querySelector("form");
+                if (formElement) formElement.reset();
+              }
+
+              const toggleBtn = document.querySelector('.toggle-form-btn[data-target="' + targetId + '"]');
+              if (toggleBtn) toggleBtn.style.display = "inline-block";
+            });
+          });
+
+          const employeeView = document.getElementById("employee-details-view");
+          const employeeEdit = document.getElementById("employee-details-edit");
+          const btnEditEmployee = document.getElementById("btn-edit-employee");
+          const btnCancelEmployee = document.getElementById("btn-cancel-employee");
+
+          if (btnEditEmployee) {
+            btnEditEmployee.addEventListener("click", function() {
+              employeeView.style.display = "none";
+              employeeEdit.style.display = "block";
+            });
+          }
+
+          if (btnCancelEmployee) {
+            btnCancelEmployee.addEventListener("click", function() {
+              employeeEdit.style.display = "none";
+              employeeView.style.display = "block";
+            });
+          }
+
+          const btnShowDocForm = document.getElementById("btn-show-doc-form");
+          const docFormContainer = document.getElementById("doc-form-container");
+          const btnCancelDocForm = document.getElementById("btn-cancel-doc-form");
+
+          if (btnShowDocForm) {
+            btnShowDocForm.addEventListener("click", function() {
+              docFormContainer.style.display = "block";
+              btnShowDocForm.style.display = "none";
+            });
+          }
+
+          if (btnCancelDocForm) {
+            btnCancelDocForm.addEventListener("click", function() {
+              docFormContainer.style.display = "none";
+              const form = docFormContainer.querySelector("form");
+              if (form) form.reset();
+              btnShowDocForm.style.display = "inline-block";
+            });
+          }
+
+          const personalView = document.getElementById("personal-details-view");
+          const personalEdit = document.getElementById("personal-details-edit");
+          const btnEditPersonal = document.getElementById("btn-edit-personal");
+          const btnCancelPersonal = document.getElementById("btn-cancel-personal");
+
+          if (btnEditPersonal) {
+            btnEditPersonal.addEventListener("click", function() {
+              personalView.style.display = "none";
+              personalEdit.style.display = "block";
+            });
+          }
+
+          if (btnCancelPersonal) {
+            btnCancelPersonal.addEventListener("click", function() {
+              personalEdit.style.display = "none";
+              personalView.style.display = "block";
+            });
+          }
+        });
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+
+
+
+
