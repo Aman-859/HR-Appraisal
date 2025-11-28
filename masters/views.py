@@ -952,42 +952,34 @@ def manager_dashboard(request):
     employees_under_manager = []
     draft_forms = []
     
-    # Active appraisal cycle
     active_cycle = AppraisalCycle.objects.filter(status="Active").first()
 
-    # Step 1: Department selected → show all employees from that department
     department_id = request.GET.get("department")
     if department_id:
         selected_department = Department.objects.filter(id=department_id).first()
         if selected_department:
-            managers = Employee.objects.filter(department=selected_department)
+            managers = Employee.objects.filter(
+                department=selected_department,
+                role__role_name__in=["Manager", "Supervisor", "Supervisior"]
+            ).select_related('role').order_by('role__role_name', 'first_name')
 
-    # Step 2: Manager selected → fetch hierarchy
     manager_id = request.GET.get("manager")
     if manager_id and active_cycle:
         selected_manager = Employee.objects.filter(id=manager_id).first()
         if selected_manager:
             role_name = selected_manager.role.role_name.lower() if selected_manager.role else ""
 
-            # SAME LOGIC as your WORKING team_appraisal_list
             if role_name == "manager":
-                # get ALL employees in the department (except the manager)
                 dept_emps = Employee.objects.filter(department=selected_manager.department)\
                                            .exclude(id=selected_manager.id)
-
-                # also include supervisor → employee chains
                 subordinates = get_all_subordinates(selected_manager)
-
-                # merge department employees + all recursive subordinates
                 employees_under_manager = list(set(list(dept_emps) + list(subordinates)))
 
             elif role_name in ["supervisor", "supervisior"]:
-                # supervisor → only direct employees
                 employees_under_manager = list(
                     Employee.objects.filter(supervisor=selected_manager)
                 )
 
-            # NOW fetch draft forms of these employees
             draft_forms = AppraisalForm.objects.filter(
                 employee__in=employees_under_manager,
                 appraisal_cycle=active_cycle,
@@ -1002,8 +994,3 @@ def manager_dashboard(request):
         "employees_under_manager": employees_under_manager,
         "draft_forms": draft_forms
     })
-
-
-
-           
-

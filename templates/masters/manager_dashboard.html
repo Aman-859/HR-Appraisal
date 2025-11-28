@@ -1,49 +1,228 @@
 {% extends "base.html" %}
 {% block content %}
-<form method="get">
-    <label>Department:</label>
-    <select name="department" onchange="this.form.submit()">
-        <option value="">Select Department</option>
-        {% for d in departments %}
-            <option value="{{ d.id }}" {% if request.GET.department == d.id|stringformat:"s" %}selected{% endif %}>
-                {{ d.name }}
-            </option>
-        {% endfor %}
-    </select>
+<style>
+    .dashboard-container {
+        padding: 20px;
+        background: #f5f7fa;
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        min-width: 180px;
+        max-width: 220px;
+    }
+    
+    .filter-group label {
+        display: block;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+        font-size: 0.8rem;
+    }
+    
+    .filter-group select {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        background: white;
+    }
+    
+    .filter-group select:focus {
+        outline: none;
+        border-color: #1e3c72;
+    }
+    
+    .results-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .results-header {
+        background: #1e3c72;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .results-header h5 {
+        margin: 0;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    
+    .results-count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+    
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .styled-table thead {
+        background: #f8f9fa;
+    }
+    
+    .styled-table thead th {
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #1e3c72;
+        font-size: 0.85rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .styled-table tbody tr {
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .styled-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .styled-table tbody td {
+        padding: 12px 15px;
+        color: #333;
+        font-size: 0.9rem;
+    }
+    
+    .badge-status {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .badge-draft {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .badge-submitted {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .badge-reviewed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-closed {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state p {
+        margin: 0;
+    }
+</style>
 
-    {% if managers %}
-        <label>Manager/Supervisor:</label>
-        <select name="manager" onchange="this.form.submit()">
-            <option value="">Select Manager</option>
-            {% for m in managers %}
-                <option value="{{ m.id }}" {% if request.GET.manager == m.id|stringformat:"s" %}selected{% endif %}>
-                    {{ m.first_name }} {{ m.last_name }}
-                </option>
-            {% endfor %}
-        </select>
-    {% endif %}
-</form>
+<div class="dashboard-container">
+    <div class="filter-card">
+        <form method="get">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Department</label>
+                    <select name="department" onchange="this.form.submit()">
+                        <option value="">-- Select Department --</option>
+                        {% for d in departments %}
+                            <option value="{{ d.id }}" {% if request.GET.department == d.id|stringformat:"s" %}selected{% endif %}>
+                                {{ d.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-
-
-<h4>Draft Appraisal Forms</h4>
-
-{% if draft_forms %}
-<table class="table">
-  <tr>
-    <th>Employee</th>
-    <th>Cycle</th>
-    <th>Status</th>
-  </tr>
-  {% for form in draft_forms %}
-  <tr>
-    <td>{{ form.employee }}</td>
-    <td>{{ form.appraisal_cycle.name }}</td>
-    <td>{{ form.status }}</td>
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<p>No draft forms found.</p>
-{% endif %}
+                {% if managers %}
+                <div class="filter-group">
+                    <label>Manager / Supervisor</label>
+                    <select name="manager" onchange="this.form.submit()">
+                        <option value="">-- Select --</option>
+                        {% for m in managers %}
+                            <option value="{{ m.id }}" {% if request.GET.manager == m.id|stringformat:"s" %}selected{% endif %}>
+                                {{ m.first_name }} {{ m.last_name }} ({{ m.role.role_name }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <div class="results-card">
+        <div class="results-header">
+            <h5>Draft Appraisal Forms</h5>
+            <span class="results-count">{{ draft_forms|length }} Records</span>
+        </div>
+        
+        {% if draft_forms %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Employee ID</th>
+                    <th>Appraisal Cycle</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in draft_forms %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ form.employee.first_name }} {{ form.employee.last_name }}</td>
+                    <td>{{ form.employee.employee_id }}</td>
+                    <td>{{ form.appraisal_cycle.name }} ({{ form.appraisal_cycle.year }})</td>
+                    <td>{{ form.employee.department.name|default:"-" }}</td>
+                    <td>
+                        <span class="badge-status 
+                            {% if form.status == 'Draft' %}badge-draft
+                            {% elif form.status == 'Submitted' %}badge-submitted
+                            {% elif form.status == 'Reviewed' %}badge-reviewed
+                            {% else %}badge-closed{% endif %}">
+                            {{ form.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <p>No draft appraisals found</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
