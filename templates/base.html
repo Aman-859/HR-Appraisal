@@ -30,35 +30,72 @@
         .btn { background-color:#0073e6; color:white; padding:6px 12px; border:none; border-radius:4px; cursor:pointer; }
         .btn:hover { background-color:#005bb5; }
 
-        /* Dropdown Styles */
-        nav ul li.dropdown { position: relative; }
-        nav ul li .dropdown-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: #00509e;
-            min-width: 200px;
-            z-index: 1000;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        nav ul li .dropdown-content li a {
-            padding: 10px 15px;
-            display: block;
-            color: white;
-        }
-        nav ul li .dropdown-content li a:hover {
-            background-color: #0073e6;
-        }
-        nav ul li.dropdown:hover .dropdown-content {
-            display: block;
-        }
-        html, body {
-        height: auto !important;
-        overflow-y: auto !important;
-        }
+       
+nav ul li .dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;         
+    left: 0;
+    background-color: #00509e;
+    min-width: 200px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 9999;      
+    border: 1px solid #003f7f;
+}
+
+
+nav ul li.dropdown:hover > .dropdown-content {
+    display: block;
+}
+
+
+nav ul li .dropdown-content li {
+    position: relative;
+}
+
+nav ul li .dropdown-content li .sub-dropdown {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%;         
+    background-color: #00509e;
+    min-width: 200px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 10000;
+    border: 1px solid #003f7f;
+}
+
+
+nav ul li .dropdown-content li.dropdown.nested:hover > .sub-dropdown {
+    display: block;
+}
+
+
+nav ul li .dropdown-content li a,
+nav ul li .dropdown-content li .sub-dropdown li a {
+    padding: 10px 15px;
+    display: block;
+    color: white;
+    white-space: nowrap;
+}
+
+nav ul li .dropdown-content li a:hover,
+nav ul li .dropdown-content li .sub-dropdown li a:hover {
+    background-color: #0073e6;
+}
+.disabled {
+    color: #bbb !important;           
+    pointer-events: none !important;   
+    cursor: default !important;
+    opacity: 0.6;                     
+}
+
+
+        
     </style> 
 </head>
 <body>
@@ -118,8 +155,8 @@
                     <a href="#">Appraisal Status ▸</a>
                     <ul class="sub-dropdown">
                         <li><a href="{% url 'masters:cycle_progress' %}">Cycle Progress Status</a></li>
-                        <li><a href="#">Manager Review Summary</a></li>
-                        <li><a href="#">Late Submission</a></li>
+                        <li><a class="disabled">Manager Review Summary</a></li>
+                        <li><a class="disabled">Late Submission</a></li>
                     </ul>
                 </li>
 
@@ -127,16 +164,16 @@
                 <li class="dropdown nested">
                     <a href="#">Team Reports ▸</a>
                     <ul class="sub-dropdown">
-                        <li><a href="#">Employee Appraisal History</a></li>
+                        <li><a class="disabled">Employee Appraisal History</a></li>
                         <li><a href="{% url 'masters:manager_dashboard' %}">Manager Dashboard</a></li>
                         
                     </ul>
                 </li>
 
                 <li class="dropdown nested">
-                    <a href="#">Audit Reports ▸</a>
+                    <a class = "disabled">Audit Reports ▸</a>
                     <ul class="sub-dropdown">
-                        <li><a href="#">Employee Access</a></li>
+                        <li><a class = "disabled">Employee Access</a></li>
                         
                     </ul>
                 </li>

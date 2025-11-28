@@ -25,23 +25,7 @@
 </form>
 
 
-{% if employees_under_manager %}
-{% for emp in employees_under_manager %}
-<table>
-    <tr>
-        <th>Employee First Name</th>
-        <th>Employee Last Name</th>
-        <th>Role</th>
-    </tr>
-    
-    <tr>
-        <td>{{ emp.first_name }}</td>
-        <td>{{ emp.last_name }}</td>
-        <td>{{ emp.role.role_name }}</td>
-    </tr>
-</table>
-    {% endfor %}
-{% endif %}
+
 <h4>Draft Appraisal Forms</h4>
 
 {% if draft_forms %}
