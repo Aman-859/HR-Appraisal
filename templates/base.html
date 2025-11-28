@@ -8,94 +8,176 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-
     <style>
-        
-
-        body { font-family: Arial, sans-serif; margin:0; background-color:#f5f9fc; }
-        header { background-color:#003366; color:white; padding:10px; }
-        nav ul { list-style:none; margin:0; padding:0; display:flex; background-color:#00509e; }
-        nav ul li { margin:0; position:relative; }
-        nav ul li a {
-            color:white; padding:12px 20px; display:block; text-decoration:none;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        nav ul li a:hover { background-color:#0073e6; }
-        main { padding:20px; }
-        .container { background:white; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
-        footer { text-align:center; padding:10px; background-color:#003366; color:white; }
-        table { border-collapse:collapse; width:100%; }
-        table, th, td { border:1px solid #ccc; }
-        th { background-color:#0073e6; color:white; }
-        td, th { padding:8px; text-align:left; }
-        .btn { background-color:#0073e6; color:white; padding:6px 12px; border:none; border-radius:4px; cursor:pointer; }
-        .btn:hover { background-color:#005bb5; }
-
-       
-nav ul li .dropdown-content {
-    display: none;
-    position: absolute;
-    top: 100%;         
-    left: 0;
-    background-color: #00509e;
-    min-width: 200px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    z-index: 9999;      
-    border: 1px solid #003f7f;
-}
-
-
-nav ul li.dropdown:hover > .dropdown-content {
-    display: block;
-}
-
-
-nav ul li .dropdown-content li {
-    position: relative;
-}
-
-nav ul li .dropdown-content li .sub-dropdown {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 100%;         
-    background-color: #00509e;
-    min-width: 200px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    z-index: 10000;
-    border: 1px solid #003f7f;
-}
-
-
-nav ul li .dropdown-content li.dropdown.nested:hover > .sub-dropdown {
-    display: block;
-}
-
-
-nav ul li .dropdown-content li a,
-nav ul li .dropdown-content li .sub-dropdown li a {
-    padding: 10px 15px;
-    display: block;
-    color: white;
-    white-space: nowrap;
-}
-
-nav ul li .dropdown-content li a:hover,
-nav ul li .dropdown-content li .sub-dropdown li a:hover {
-    background-color: #0073e6;
-}
-.disabled {
-    color: #bbb !important;           
-    pointer-events: none !important;   
-    cursor: default !important;
-    opacity: 0.6;                     
-}
-
-
         
+        html {
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #f5f9fc;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        header { 
+            background-color: #003366; 
+            color: white; 
+            padding: 10px;
+            flex-shrink: 0;
+        }
+        
+        nav {
+            flex-shrink: 0;
+        }
+        
+        nav ul { 
+            list-style: none; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            background-color: #00509e; 
+        }
+        
+        nav ul li { 
+            margin: 0; 
+            position: relative; 
+        }
+        
+        nav ul li a {
+            color: white; 
+            padding: 12px 20px; 
+            display: block; 
+            text-decoration: none;
+        }
+        
+        nav ul li a:hover { 
+            background-color: #0073e6; 
+        }
+        
+        main { 
+            padding: 20px;
+            flex: 1;
+            overflow-y: visible;
+        }
+        
+        .container { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        
+        footer { 
+            text-align: center; 
+            padding: 10px; 
+            background-color: #003366; 
+            color: white;
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+        
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+        }
+        
+        table, th, td { 
+            border: 1px solid #ccc; 
+        }
+        
+        th { 
+            background-color: #0073e6; 
+            color: white; 
+        }
+        
+        td, th { 
+            padding: 8px; 
+            text-align: left; 
+        }
+        
+        .btn { 
+            background-color: #0073e6; 
+            color: white; 
+            padding: 6px 12px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        
+        .btn:hover { 
+            background-color: #005bb5; 
+        }
+
+        nav ul li .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;         
+            left: 0;
+            background-color: #00509e;
+            min-width: 200px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            z-index: 9999;      
+            border: 1px solid #003f7f;
+        }
+
+        nav ul li.dropdown:hover > .dropdown-content {
+            display: block;
+        }
+
+        nav ul li .dropdown-content li {
+            position: relative;
+        }
+
+        nav ul li .dropdown-content li .sub-dropdown {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 100%;         
+            background-color: #00509e;
+            min-width: 200px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            z-index: 10000;
+            border: 1px solid #003f7f;
+        }
+
+        nav ul li .dropdown-content li.dropdown.nested:hover > .sub-dropdown {
+            display: block;
+        }
+
+        nav ul li .dropdown-content li a,
+        nav ul li .dropdown-content li .sub-dropdown li a {
+            padding: 10px 15px;
+            display: block;
+            color: white;
+            white-space: nowrap;
+        }
+
+        nav ul li .dropdown-content li a:hover,
+        nav ul li .dropdown-content li .sub-dropdown li a:hover {
+            background-color: #0073e6;
+        }
+        
+        .disabled {
+            color: #bbb !important;           
+            pointer-events: none !important;   
+            cursor: default !important;
+            opacity: 0.6;                     
+        }
     </style> 
 </head>
 <body>
@@ -123,7 +205,6 @@ nav ul li .dropdown-content li .sub-dropdown li a:hover {
                 {% endif %}
             </li>
             
-            
     {% if role_name == 'manager' or role_name == 'hr admin' %}
   <li class="dropdown">
     <a href="#" class="dropbtn">My Appraisals ▾</a>
@@ -150,7 +231,6 @@ nav ul li .dropdown-content li .sub-dropdown li a:hover {
             <a href="#">Reports ▾</a>
             <ul class="dropdown-content">
 
-                
                 <li class="dropdown nested">
                     <a href="#">Appraisal Status ▸</a>
                     <ul class="sub-dropdown">
@@ -160,27 +240,23 @@ nav ul li .dropdown-content li .sub-dropdown li a:hover {
                     </ul>
                 </li>
 
-                
                 <li class="dropdown nested">
                     <a href="#">Team Reports ▸</a>
                     <ul class="sub-dropdown">
                         <li><a class="disabled">Employee Appraisal History</a></li>
                         <li><a href="{% url 'masters:manager_dashboard' %}">Manager Dashboard</a></li>
-                        
                     </ul>
                 </li>
 
                 <li class="dropdown nested">
-                    <a class = "disabled">Audit Reports ▸</a>
+                    <a class="disabled">Audit Reports ▸</a>
                     <ul class="sub-dropdown">
-                        <li><a class = "disabled">Employee Access</a></li>
-                        
+                        <li><a class="disabled">Employee Access</a></li>
                     </ul>
                 </li>
 
             </ul>
         </li>
-
 
             <li><a href="{% url 'masters:emp_profile' %}">Profile</a></li>
             <li><a href="">Notifications</a></li>
