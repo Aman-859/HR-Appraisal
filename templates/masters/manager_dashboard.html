@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="get">
+    <label>Department:</label>
+    <select name="department" onchange="this.form.submit()">
+        <option value="">Select Department</option>
+        {% for d in departments %}
+            <option value="{{ d.id }}" {% if request.GET.department == d.id|stringformat:"s" %}selected{% endif %}>
+                {{ d.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    {% if managers %}
+        <label>Manager/Supervisor:</label>
+        <select name="manager" onchange="this.form.submit()">
+            <option value="">Select Manager</option>
+            {% for m in managers %}
+                <option value="{{ m.id }}" {% if request.GET.manager == m.id|stringformat:"s" %}selected{% endif %}>
+                    {{ m.first_name }} {{ m.last_name }}
+                </option>
+            {% endfor %}
+        </select>
+    {% endif %}
+</form>
+
+
+{% if employees_under_manager %}
+{% for emp in employees_under_manager %}
+<table>
+    <tr>
+        <th>Employee First Name</th>
+        <th>Employee Last Name</th>
+        <th>Role</th>
+    </tr>
+    
+    <tr>
+        <td>{{ emp.first_name }}</td>
+        <td>{{ emp.last_name }}</td>
+        <td>{{ emp.role.role_name }}</td>
+    </tr>
+</table>
+    {% endfor %}
+{% endif %}
+<h4>Draft Appraisal Forms</h4>
+
+{% if draft_forms %}
+<table class="table">
+  <tr>
+    <th>Employee</th>
+    <th>Cycle</th>
+    <th>Status</th>
+  </tr>
+  {% for form in draft_forms %}
+  <tr>
+    <td>{{ form.employee }}</td>
+    <td>{{ form.appraisal_cycle.name }}</td>
+    <td>{{ form.status }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>No draft forms found.</p>
+{% endif %}
+{% endblock %}

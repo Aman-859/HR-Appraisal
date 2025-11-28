@@ -109,7 +109,42 @@
             
             <li><a href="{% url 'masters:reviews_list' %}">Reviews</a></li>
             {% endif %}
-            <li><a href="">Reports</a></li>
+            <li class="dropdown">
+            <a href="#">Reports ▾</a>
+            <ul class="dropdown-content">
+
+                
+                <li class="dropdown nested">
+                    <a href="#">Appraisal Status ▸</a>
+                    <ul class="sub-dropdown">
+                        <li><a href="{% url 'masters:cycle_progress' %}">Cycle Progress Status</a></li>
+                        <li><a href="#">Manager Review Summary</a></li>
+                        <li><a href="#">Late Submission</a></li>
+                    </ul>
+                </li>
+
+                
+                <li class="dropdown nested">
+                    <a href="#">Team Reports ▸</a>
+                    <ul class="sub-dropdown">
+                        <li><a href="#">Employee Appraisal History</a></li>
+                        <li><a href="{% url 'masters:manager_dashboard' %}">Manager Dashboard</a></li>
+                        
+                    </ul>
+                </li>
+
+                <li class="dropdown nested">
+                    <a href="#">Audit Reports ▸</a>
+                    <ul class="sub-dropdown">
+                        <li><a href="#">Employee Access</a></li>
+                        
+                    </ul>
+                </li>
+
+            </ul>
+        </li>
+
+
             <li><a href="{% url 'masters:emp_profile' %}">Profile</a></li>
             <li><a href="">Notifications</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>

@@ -54,8 +54,10 @@ urlpatterns = [
     path("reviews/", views.review_list_form, name="reviews_list"),
     path("team",views.team_appraisal_list, name="team_appraisal"),
 
-    #profile
+    
       path('employee-profile/', views.emp_profile, name='emp_profile'),
-      path('employee-profile/<int:employee_id>/', views.emp_profile, name='emp_profile_view')
-
+      path('employee-profile/<int:employee_id>/', views.emp_profile, name='emp_profile_view'),
+      path('cycle-progress',views.cycle_progress, name= "cycle_progress"),
+      path("manager-dashboard",views.manager_dashboard, name="manager_dashboard")
+    
 ]

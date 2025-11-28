@@ -908,3 +908,102 @@ def emp_profile(request, employee_id=None):
     }
 
     return render(request, "profile/profile.html", context)
+
+def cycle_progress(request):
+    cycles = AppraisalCycle.objects.filter(status="Active")
+    selected_cycle = None
+    image_path = None
+
+   
+    cycle_images = {
+        "semi-annual": "images/cycle_progress_1.png",
+        "final year": "images/cycle_progress_2.png",
+    }
+
+    cycle_id = request.GET.get("cycle_id")
+
+    if cycle_id:
+        selected_cycle = AppraisalCycle.objects.get(id=cycle_id)
+        image_path = cycle_images.get(selected_cycle.name, "images/default_cycle.png")
+
+    return render(request, "masters/cycle_progress.html", {
+        "cycles": cycles,
+        "selected_cycle": selected_cycle,
+        "image_path": image_path
+    })
+
+def get_all_subordinates(manager):
+    subordinates = []
+    direct = Employee.objects.filter(supervisor=manager)
+
+    for emp in direct:
+        subordinates.append(emp)
+        subordinates.extend(get_all_subordinates(emp))
+
+    return subordinates
+
+
+@login_required
+def manager_dashboard(request):
+    departments = Department.objects.all()
+    selected_department = None
+    selected_manager = None
+    managers = []
+    employees_under_manager = []
+    draft_forms = []
+    
+    # Active appraisal cycle
+    active_cycle = AppraisalCycle.objects.filter(status="Active").first()
+
+    # Step 1: Department selected → show all employees from that department
+    department_id = request.GET.get("department")
+    if department_id:
+        selected_department = Department.objects.filter(id=department_id).first()
+        if selected_department:
+            managers = Employee.objects.filter(department=selected_department)
+
+    # Step 2: Manager selected → fetch hierarchy
+    manager_id = request.GET.get("manager")
+    if manager_id and active_cycle:
+        selected_manager = Employee.objects.filter(id=manager_id).first()
+        if selected_manager:
+            role_name = selected_manager.role.role_name.lower() if selected_manager.role else ""
+
+            # SAME LOGIC as your WORKING team_appraisal_list
+            if role_name == "manager":
+                # get ALL employees in the department (except the manager)
+                dept_emps = Employee.objects.filter(department=selected_manager.department)\
+                                           .exclude(id=selected_manager.id)
+
+                # also include supervisor → employee chains
+                subordinates = get_all_subordinates(selected_manager)
+
+                # merge department employees + all recursive subordinates
+                employees_under_manager = list(set(list(dept_emps) + list(subordinates)))
+
+            elif role_name in ["supervisor", "supervisior"]:
+                # supervisor → only direct employees
+                employees_under_manager = list(
+                    Employee.objects.filter(supervisor=selected_manager)
+                )
+
+            # NOW fetch draft forms of these employees
+            draft_forms = AppraisalForm.objects.filter(
+                employee__in=employees_under_manager,
+                appraisal_cycle=active_cycle,
+                status="Draft"
+            ).select_related("employee", "appraisal_cycle")
+
+    return render(request, "masters/manager_dashboard.html", {
+        "departments": departments,
+        "selected_department": selected_department,
+        "managers": managers,
+        "selected_manager": selected_manager,
+        "employees_under_manager": employees_under_manager,
+        "draft_forms": draft_forms
+    })
+
+
+
+           
+

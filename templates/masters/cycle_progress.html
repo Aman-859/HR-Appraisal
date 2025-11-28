@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+
+  <h2>Cycle Progress Status</h2>
+
+  <form method="GET">
+      <label>Select Active Cycle:</label>
+      <select name="cycle_id" onchange="this.form.submit()" class="form-control">
+          <option value="">-- Select Cycle --</option>
+          {% for c in cycles %}
+              <option value="{{ c.id }}"
+                {% if selected_cycle and selected_cycle.id == c.id %}selected{% endif %}>
+                  {{ c.name }}
+              </option>
+          {% endfor %}
+      </select>
+  </form>
+
+  <br>
+
+  {% if selected_cycle %}
+      <h3>{{ selected_cycle.name }}</h3>
+      <img src="{% static 'images/cycle_progress_1.png' %}" style="max-width:350px;">
+  {% endif %}
+</div>
+{% endblock %}
