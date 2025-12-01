@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+
 <style>
     .dashboard-container {
         padding: 20px;
         background: #f5f7fa;
     }
-    
+
     .filter-card {
         background: white;
         border-radius: 8px;
@@ -13,18 +14,18 @@
         margin-bottom: 20px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
-    
+
     .filter-row {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
     }
-    
+
     .filter-group {
         min-width: 180px;
         max-width: 220px;
     }
-    
+
     .filter-group label {
         display: block;
         font-weight: 500;
@@ -32,28 +33,126 @@
         margin-bottom: 4px;
         font-size: 0.8rem;
     }
-    
-    .filter-group select {
+
+    .custom-select {
+        position: relative;
         width: 100%;
-        padding: 6px 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 0.8rem;
+    }
+
+    .custom-select-display {
+        padding: 11px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        background: #ffffff;
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .custom-select-display:hover {
+        border-color: #a0a5ab;
+    }
+
+    .custom-select.active .custom-select-display {
+        border-color: #007AFF;
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    .custom-select-display span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: 8px;
+    }
+
+    .custom-select-arrow {
+        font-size: 0.7rem;
+        color: #666;
+        transition: transform 0.2s ease;
+    }
+
+    .custom-select.active .custom-select-arrow {
+        transform: rotate(180deg);
+    }
+
+    .custom-select-options {
+        position: absolute;
+        top: 110%;
+        left: 0;
+        width: 100%;
         background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        max-height: 240px;
+        overflow-y: auto;
+        display: none;
+        z-index: 1000;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
-    
-    .filter-group select:focus {
-        outline: none;
-        border-color: #1e3c72;
+
+    .custom-select-options::-webkit-scrollbar {
+        display: none;
     }
-    
+
+    .custom-select.active .custom-select-options {
+        display: block;
+        animation: slideDown 0.2s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .custom-option {
+        padding: 12px 14px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.15s ease;
+        color: #000;
+        user-select: none;
+    }
+
+    .custom-option:first-child {
+        border-radius: 12px 12px 0 0;
+    }
+
+    .custom-option:last-child {
+        border-radius: 0 0 12px 12px;
+    }
+
+    .custom-option:hover {
+        background: #f0f0f5;
+    }
+
+    .custom-option.selected {
+        background: #007AFF;
+        color: white;
+    }
+
+    .custom-option.selected:hover {
+        background: #0051D5;
+    }
+
     .results-card {
         background: white;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         overflow: hidden;
     }
-    
+
     .results-header {
         background: #1e3c72;
         color: white;
@@ -62,29 +161,29 @@
         justify-content: space-between;
         align-items: center;
     }
-    
+
     .results-header h5 {
         margin: 0;
         font-weight: 500;
         font-size: 1rem;
     }
-    
+
     .results-count {
         background: rgba(255, 255, 255, 0.2);
         padding: 4px 12px;
         border-radius: 15px;
         font-size: 0.8rem;
     }
-    
+
     .styled-table {
         width: 100%;
         border-collapse: collapse;
     }
-    
+
     .styled-table thead {
         background: #f8f9fa;
     }
-    
+
     .styled-table thead th {
         padding: 12px 15px;
         text-align: left;
@@ -93,98 +192,137 @@
         font-size: 0.85rem;
         border-bottom: 2px solid #e9ecef;
     }
-    
+
     .styled-table tbody tr {
         border-bottom: 1px solid #f0f0f0;
     }
-    
+
     .styled-table tbody tr:hover {
         background: #f8f9fa;
     }
-    
+
     .styled-table tbody td {
         padding: 12px 15px;
         color: #333;
         font-size: 0.9rem;
     }
-    
+
     .badge-status {
         padding: 4px 10px;
         border-radius: 12px;
         font-size: 0.75rem;
         font-weight: 500;
     }
-    
-    .badge-draft {
-        background: #fff3cd;
-        color: #856404;
-    }
-    
-    .badge-submitted {
-        background: #cce5ff;
-        color: #004085;
-    }
-    
-    .badge-reviewed {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .badge-closed {
-        background: #e2e3e5;
-        color: #383d41;
-    }
-    
+
+    .badge-draft { background: #fff3cd; color: #856404; }
+    .badge-submitted { background: #cce5ff; color: #004085; }
+    .badge-reviewed { background: #d4edda; color: #155724; }
+    .badge-closed { background: #e2e3e5; color: #383d41; }
+
     .empty-state {
         text-align: center;
         padding: 40px 20px;
         color: #6c757d;
     }
-    
-    .empty-state p {
-        margin: 0;
-    }
 </style>
 
 <div class="dashboard-container">
+
     <div class="filter-card">
         <form method="get">
             <div class="filter-row">
+
                 <div class="filter-group">
                     <label>Department</label>
-                    <select name="department" onchange="this.form.submit()">
-                        <option value="">-- Select Department --</option>
-                        {% for d in departments %}
-                            <option value="{{ d.id }}" {% if request.GET.department == d.id|stringformat:"s" %}selected{% endif %}>
-                                {{ d.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
+
+                    <div class="custom-select">
+                        <div class="custom-select-display">
+                            <span>
+                                {% if request.GET.department %}
+                                    {% for d in departments %}
+                                        {% if d.id|stringformat:"s" == request.GET.department %}
+                                            {{ d.name }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    -- Select Department --
+                                {% endif %}
+                            </span>
+                            <span class="custom-select-arrow">▼</span>
+                        </div>
+
+                        <div class="custom-select-options">
+                            <div class="custom-option" data-value="">-- Select Department --</div>
+
+                            {% for d in departments %}
+                                <div class="custom-option" data-value="{{ d.id }}">{{ d.name }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <select name="department" style="display:none;" onchange="this.form.submit()">
+                            <option value=""></option>
+                            {% for d in departments %}
+                                <option value="{{ d.id }}" {% if request.GET.department == d.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ d.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
                 {% if managers %}
                 <div class="filter-group">
                     <label>Manager / Supervisor</label>
-                    <select name="manager" onchange="this.form.submit()">
-                        <option value="">-- Select --</option>
-                        {% for m in managers %}
-                            <option value="{{ m.id }}" {% if request.GET.manager == m.id|stringformat:"s" %}selected{% endif %}>
-                                {{ m.first_name }} {{ m.last_name }} ({{ m.role.role_name }})
-                            </option>
-                        {% endfor %}
-                    </select>
+
+                    <div class="custom-select">
+                        <div class="custom-select-display">
+                            <span>
+                                {% if request.GET.manager %}
+                                    {% for m in managers %}
+                                        {% if m.id|stringformat:"s" == request.GET.manager %}
+                                            {{ m.first_name }} {{ m.last_name }} ({{ m.role.role_name }})
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    -- Select --
+                                {% endif %}
+                            </span>
+                            <span class="custom-select-arrow">▼</span>
+                        </div>
+
+                        <div class="custom-select-options">
+                            <div class="custom-option" data-value="">-- Select --</div>
+
+                            {% for m in managers %}
+                                <div class="custom-option" data-value="{{ m.id }}">
+                                    {{ m.first_name }} {{ m.last_name }} ({{ m.role.role_name }})
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <select name="manager" style="display:none;" onchange="this.form.submit()">
+                            <option value=""></option>
+                            {% for m in managers %}
+                                <option value="{{ m.id }}" {% if request.GET.manager == m.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ m.first_name }} {{ m.last_name }} ({{ m.role.role_name }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 {% endif %}
+
             </div>
         </form>
     </div>
-    
+
     <div class="results-card">
+
         <div class="results-header">
             <h5>Draft Appraisal Forms</h5>
             <span class="results-count">{{ draft_forms|length }} Records</span>
         </div>
-        
+
         {% if draft_forms %}
         <table class="styled-table">
             <thead>
@@ -218,11 +356,48 @@
                 {% endfor %}
             </tbody>
         </table>
+
         {% else %}
-        <div class="empty-state">
-            <p>No draft appraisals found</p>
-        </div>
+            <div class="empty-state">
+                <p>No draft appraisals found</p>
+            </div>
         {% endif %}
+
     </div>
 </div>
+
+<script>
+document.querySelectorAll(".custom-select").forEach(select => {
+    const display = select.querySelector(".custom-select-display");
+    const options = select.querySelector(".custom-select-options");
+    const hiddenSelect = select.querySelector("select");
+
+    display.onclick = () => {
+        select.classList.toggle("active");
+    };
+
+    options.querySelectorAll(".custom-option").forEach(opt => {
+        opt.onclick = () => {
+            options.querySelectorAll(".custom-option").forEach(o => o.classList.remove("selected"));
+            opt.classList.add("selected");
+            
+            display.querySelector("span").textContent = opt.textContent;
+            hiddenSelect.value = opt.getAttribute("data-value");
+            select.classList.remove("active");
+            hiddenSelect.dispatchEvent(new Event("change"));
+        };
+        
+        if (opt.getAttribute("data-value") === hiddenSelect.value) {
+            opt.classList.add("selected");
+        }
+    });
+});
+
+document.addEventListener("click", e => {
+    document.querySelectorAll(".custom-select").forEach(select => {
+        if (!select.contains(e.target)) select.classList.remove("active");
+    });
+});
+</script>
+
 {% endblock %}

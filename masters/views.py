@@ -994,3 +994,7 @@ def manager_dashboard(request):
         "employees_under_manager": employees_under_manager,
         "draft_forms": draft_forms
     })
+
+
+def notifications(request):
+    return render(request ,"notification.html" )

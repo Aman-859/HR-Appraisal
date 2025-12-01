@@ -18,6 +18,12 @@
         html {
             height: 100%;
             overflow-y: auto;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        html::-webkit-scrollbar {
+            display: none;  /* Chrome, Safari and Opera */
         }
         
         body { 
@@ -28,6 +34,10 @@
             flex-direction: column;
             overflow-y: auto;
             overflow-x: hidden;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;  /* Chrome, Safari and Opera */
         }
         
         header { 
@@ -228,6 +238,7 @@
             <li><a href="{% url 'masters:reviews_list' %}">Reviews</a></li>
             {% endif %}
             <li class="dropdown">
+            {% if role_name == 'manager' or role_name == 'hr admin' %}
             <a href="#">Reports ▾</a>
             <ul class="dropdown-content">
 
@@ -256,10 +267,11 @@
                 </li>
 
             </ul>
+             {% endif %}
         </li>
 
             <li><a href="{% url 'masters:emp_profile' %}">Profile</a></li>
-            <li><a href="">Notifications</a></li>
+            <li><a href="{% url 'masters:notifications' %}">Notifications</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
         </ul>
     </nav>
