@@ -175,6 +175,20 @@
         font-size: 0.8rem;
     }
 
+    .info-banner {
+        background: #e3f2fd;
+        border-left: 4px solid #1976d2;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        color: #1565c0;
+        font-size: 0.9rem;
+    }
+
+    .info-banner strong {
+        font-weight: 600;
+    }
+
     .styled-table {
         width: 100%;
         border-collapse: collapse;
@@ -228,6 +242,16 @@
 
 <div class="dashboard-container">
 
+    <!-- Show info banner for non-HR users -->
+    {% if not is_hr_admin and selected_manager %}
+    <div class="info-banner">
+        <strong>Viewing Team:</strong> {{ selected_manager.first_name }} {{ selected_manager.last_name }}'s Team 
+        ({{ selected_manager.department.name|default:"No Department" }})
+    </div>
+    {% endif %}
+
+    <!-- Show filters only for HR Admin -->
+    {% if is_hr_admin %}
     <div class="filter-card">
         <form method="get">
             <div class="filter-row">
@@ -315,6 +339,7 @@
             </div>
         </form>
     </div>
+    {% endif %}
 
     <div class="results-card">
 
@@ -359,7 +384,11 @@
 
         {% else %}
             <div class="empty-state">
-                <p>No draft appraisals found</p>
+                {% if is_hr_admin %}
+                    <p>No draft appraisals found. Please select a department and manager to view data.</p>
+                {% else %}
+                    <p>No draft appraisals found for your team.</p>
+                {% endif %}
             </div>
         {% endif %}
 

@@ -942,9 +942,19 @@ def get_all_subordinates(manager):
 
     return subordinates
 
-
 @login_required
 def manager_dashboard(request):
+    # Get current user's employee record
+    try:
+        current_employee = Employee.objects.get(user=request.user)
+        current_role = current_employee.role.role_name.lower() if current_employee.role else ""
+    except Employee.DoesNotExist:
+        messages.error(request, "Employee record not found")
+        return redirect('dashboard')
+    
+    # Check if user is HR Admin
+    is_hr = current_role in ['hr admin', 'hr', 'admin']
+    
     departments = Department.objects.all()
     selected_department = None
     selected_manager = None
@@ -954,37 +964,65 @@ def manager_dashboard(request):
     
     active_cycle = AppraisalCycle.objects.filter(status="Active").first()
 
-    department_id = request.GET.get("department")
-    if department_id:
-        selected_department = Department.objects.filter(id=department_id).first()
-        if selected_department:
-            managers = Employee.objects.filter(
-                department=selected_department,
-                role__role_name__in=["Manager", "Supervisor", "Supervisior"]
-            ).select_related('role').order_by('role__role_name', 'first_name')
+    if is_hr:
+        # HR Admin - Use filters from GET parameters
+        department_id = request.GET.get("department")
+        if department_id:
+            selected_department = Department.objects.filter(id=department_id).first()
+            if selected_department:
+                managers = Employee.objects.filter(
+                    department=selected_department,
+                    role__role_name__in=["Manager", "Supervisor", "Supervisior"]
+                ).select_related('role').order_by('role__role_name', 'first_name')
 
-    manager_id = request.GET.get("manager")
-    if manager_id and active_cycle:
-        selected_manager = Employee.objects.filter(id=manager_id).first()
-        if selected_manager:
-            role_name = selected_manager.role.role_name.lower() if selected_manager.role else ""
+        manager_id = request.GET.get("manager")
+        if manager_id and active_cycle:
+            selected_manager = Employee.objects.filter(id=manager_id).first()
+            if selected_manager:
+                role_name = selected_manager.role.role_name.lower() if selected_manager.role else ""
 
-            if role_name == "manager":
-                dept_emps = Employee.objects.filter(department=selected_manager.department)\
-                                           .exclude(id=selected_manager.id)
-                subordinates = get_all_subordinates(selected_manager)
-                employees_under_manager = list(set(list(dept_emps) + list(subordinates)))
+                if role_name == "manager":
+                    dept_emps = Employee.objects.filter(department=selected_manager.department)\
+                                               .exclude(id=selected_manager.id)
+                    subordinates = get_all_subordinates(selected_manager)
+                    employees_under_manager = list(set(list(dept_emps) + list(subordinates)))
 
-            elif role_name in ["supervisor", "supervisior"]:
-                employees_under_manager = list(
-                    Employee.objects.filter(supervisor=selected_manager)
-                )
+                elif role_name in ["supervisor", "supervisior"]:
+                    employees_under_manager = list(
+                        Employee.objects.filter(supervisor=selected_manager)
+                    )
 
+                draft_forms = AppraisalForm.objects.filter(
+                    employee__in=employees_under_manager,
+                    appraisal_cycle=active_cycle,
+                    status="Draft"
+                ).select_related("employee", "appraisal_cycle", "employee__department")
+
+    else:
+        # Manager/Supervisor - Automatically load their team
+        if current_role == "manager":
+            selected_manager = current_employee
+            dept_emps = Employee.objects.filter(department=current_employee.department)\
+                                       .exclude(id=current_employee.id)
+            subordinates = get_all_subordinates(current_employee)
+            employees_under_manager = list(set(list(dept_emps) + list(subordinates)))
+
+        elif current_role in ["supervisor", "supervisior"]:
+            selected_manager = current_employee
+            employees_under_manager = list(
+                Employee.objects.filter(supervisor=current_employee)
+            )
+        else:
+            messages.warning(request, "You don't have permission to view this page")
+            return redirect('dashboard')
+
+        # Get draft forms for the manager's team
+        if active_cycle and employees_under_manager:
             draft_forms = AppraisalForm.objects.filter(
                 employee__in=employees_under_manager,
                 appraisal_cycle=active_cycle,
                 status="Draft"
-            ).select_related("employee", "appraisal_cycle")
+            ).select_related("employee", "appraisal_cycle", "employee__department")
 
     return render(request, "masters/manager_dashboard.html", {
         "departments": departments,
@@ -992,7 +1030,9 @@ def manager_dashboard(request):
         "managers": managers,
         "selected_manager": selected_manager,
         "employees_under_manager": employees_under_manager,
-        "draft_forms": draft_forms
+        "draft_forms": draft_forms,
+        "is_hr_admin": is_hr,
+        "current_employee": current_employee,
     })
 
 
